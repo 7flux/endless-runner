@@ -1,7 +1,6 @@
 const { merge } = require('webpack-merge');
-const common = require('./webpack.common');
-const TerserPlugin = require('terser-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const common = require('./rspack.common');
+const rspack = require('@rspack/core');
 
 module.exports = merge(common, {
   mode: 'production',
@@ -12,7 +11,7 @@ module.exports = merge(common, {
   },
   optimization: {
     minimizer: [
-      new TerserPlugin({
+      new RspackTerserPlugin({
         terserOptions: {
           output: {
             comments: false
@@ -22,6 +21,6 @@ module.exports = merge(common, {
     ]
   },
   plugins: [
-    new CleanWebpackPlugin(),
+    new rspack.CleanWebpackPlugin(),
   ]
-})
+});

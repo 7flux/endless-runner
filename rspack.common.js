@@ -1,7 +1,5 @@
 const path = require('path');
-const CopyPlugin = require('copy-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webpack = require('webpack');
+const rspack = require('@rspack/core');
 
 module.exports = {
   mode: 'development',
@@ -27,28 +25,22 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.(js|jsx|vue)$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-        }
+        type: 'javascript/auto'
       }
     ]
   },
   devServer: {
-    contentBase: path.resolve(__dirname, 'build'),
+    static: path.resolve(__dirname, 'build'),
     compress: true,
     port: 8080,
   },
   plugins: [
-    new webpack.DefinePlugin({
-      'CANVAS_RENDERER': JSON.stringify(true),
-      'WEBGL_RENDERER': JSON.stringify(true)
-    }),
-    new HtmlWebpackPlugin({
+    new rspack.HtmlRspackPlugin({
       template: './index.html'
     }),
-    new CopyPlugin({
+    new rspack.CopyRspackPlugin({
       patterns: [
         {
           from: path.resolve(__dirname, 'assets/**/*'),
