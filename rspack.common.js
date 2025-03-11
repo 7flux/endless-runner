@@ -11,6 +11,7 @@ module.exports = {
     filename: '[name].js',
     path: path.resolve(__dirname, 'build'),
   },
+  target: ['web', 'es2022'],
   optimization: {
     splitChunks: {
       cacheGroups: {
@@ -32,9 +33,14 @@ module.exports = {
     ]
   },
   devServer: {
+    allowedHosts: 'all',
     static: path.resolve(__dirname, 'build'),
     compress: true,
     port: 8080,
+    client: {
+      logging: 'info',
+    },
+    liveReload: true,
   },
   plugins: [
     new rspack.HtmlRspackPlugin({
