@@ -1,35 +1,28 @@
-import { createMenu } from './components/menu/createMenu';
-
-// Menu Scene: Main menu with options
 export class MenuScene extends Phaser.Scene {
   constructor() {
     super('MenuScene');
-    createMenu();
   }
 
   preload() {
-    this.load.image('playButton', 'assets/playButton.png');
-    this.load.image('background', 'assets/stars.png'); // background stars
+    this.load.image('player', 'assets/player.png');
+    this.load.image('enemy', 'assets/enemy.png');
   }
 
   create() {
-    // Add background stars
-    this.add.tileSprite(0, 0, 800, 600, 'background').setOrigin(0, 0);
-    
-    // Create Play button
-    let playButton = this.add.image(400, 300, 'playButton').setInteractive();
-    playButton.on('pointerdown', () => {
-      this.scene.start('GameScene');
-    });
+    // Now, the menu is dynamically created, so we don’t need HTML for this part
+    this.add.text(300, 100, 'Space Invaders', { fontSize: '48px', fill: '#fff' });
 
-    // Add options button or text here (if needed)
-    this.add.text(350, 500, 'Options', { fontSize: '24px', fill: '#fff' }).setInteractive().on('pointerdown', () => {
-      this.openOptions();
-    });
+    let startButton = this.add.text(350, 250, 'Start Game', { fontSize: '32px', fill: '#fff' })
+      .setInteractive()
+      .on('pointerdown', () => this.scene.start('GameScene'));
+    
+    let optionsButton = this.add.text(350, 300, 'Options', { fontSize: '32px', fill: '#fff' })
+      .setInteractive()
+      .on('pointerdown', () => this.showOptions());
   }
 
-  openOptions() {
-    console.log("Opening options menu...");
-    // You can show a UI to change options here (like sound, difficulty, etc.)
+  showOptions() {
+    console.log("Opening options...");
+    // Handle options menu, like volume, difficulty, etc.
   }
 }

@@ -55,4 +55,9 @@ module.exports = {
       ],
     })
   ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src/'), // should follow same logic in j(t)sconfig.json
+    },
+  },
 };
