@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { dimensions } from '.';
 
 export class GameScene extends Phaser.Scene {
   constructor() {
@@ -13,7 +14,9 @@ export class GameScene extends Phaser.Scene {
 
   create() {
     // Add background stars (space effect)
-    this.add.tileSprite(0, 0, 800, 600, 'background').setOrigin(0, 0);
+    this.add.tileSprite(0, 0, 
+      dimensions.full.width,
+      dimensions.full.height, 'background').setOrigin(0, 0);
 
     // Create player and enemies here (same as before)
     this.player = this.physics.add.image(400, 550, 'player').setOrigin(0.5, 0.5);

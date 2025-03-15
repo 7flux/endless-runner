@@ -9,7 +9,6 @@ export class MenuScene extends Phaser.Scene {
   }
 
   create() {
-    // Now, the menu is dynamically created, so we don’t need HTML for this part
     this.add.text(300, 100, 'Space Invaders', { fontSize: '48px', fill: '#fff' });
 
     let startButton = this.add.text(350, 250, 'Start Game', { fontSize: '32px', fill: '#fff' })
