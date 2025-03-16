@@ -1,8 +1,8 @@
-const { merge } = require('webpack-merge');
-const common = require('./rspack.common');
-const rspack = require('@rspack/core');
+import { merge } from 'webpack-merge';
+import common from './rspack.common';
+import rspack from '@rspack/core';
 
-module.exports = merge(common, {
+export default merge(common, {
   mode: 'production',
   devtool: false,
   performance: {

@@ -1,7 +1,9 @@
-const path = require('path');
-const rspack = require('@rspack/core');
+import path from 'path';
+import rspack from '@rspack/core';
 
-module.exports = {
+const __dirname = import.meta.dirname;
+
+export default {
   mode: 'development',
   entry: {
     app: './src/index.js'
@@ -34,7 +36,7 @@ module.exports = {
   },
   devServer: {
     allowedHosts: 'all',
-    static: path.resolve(__dirname, 'build'),
+    static: true,
     compress: true,
     port: 8080,
     client: {
@@ -59,5 +61,6 @@ module.exports = {
     alias: {
       '@': path.resolve(__dirname, 'src/'), // should follow same logic in j(t)sconfig.json
     },
+    extensions: ['.ts', '.js'],
   },
 };

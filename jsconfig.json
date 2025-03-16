@@ -1,20 +1,20 @@
 {
   "compilerOptions": {
-    "target": "es6",               // Specifies the target version (ES6)
-    "module": "commonjs",          // Specifies the module system (CommonJS)
-    "allowJs": true,               // Allows JavaScript files to be part of the project
-    "checkJs": true,               // Enables type-checking for JavaScript files
-    "jsx": "react",                // Supports JSX if needed (for React projects)
-    "baseUrl": ".",                // Base URL for resolving modules
+    "target": "es6",
+    "module": "ES2022",
+    "allowJs": true,
+    "checkJs": true,
+    "jsx": "react",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]               // Ensure the correct path to your src folder
+      "@/*": ["src/*"]
     }
   },
   "include": [
-    "src/**/*",                     // Make sure to include the src folder and its contents
-    "node_modules/@types/**/*.d.ts" // Include type definitions if any exist
+    "src/**/*",
+    "node_modules/@types/**/*.d.ts"
   ],
   "exclude": [
-    "node_modules"                  // Exclude the node_modules folder from IntelliSense
+    "node_modules"
   ]
 }
