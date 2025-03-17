@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { dimensions } from '.';
 
 export class GameScene extends Phaser.Scene {
   constructor() {
