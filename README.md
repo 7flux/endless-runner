@@ -5,7 +5,9 @@ parts of the game:
 
 1. Space. Contains: planets, star(s), civilians, pirats, aliens, gamer-like characters, asteroids, unknown objects🆕, nebula(misterious star smoke), abandoned pieces, artefacts
 
-2. Planet. Space-rangers like. you can visit shop, own ship (some crafting would be awesome)
-2.1. unlike original game, planets should be enhanced, so stations become unrelevant. Personally in last addon I hated the fact science labs could easily be destroyed, and you stack with no options to discover, heal exotic weapons, etc.
+2. Planet. Space-rangers like. you can visit shop, own ship (some crafting would be awesome).
+2.1. unlike original game, planets should be enhanced, so stations become unrelevant. Personally in last addon I hated the fact science labs could easily be destroyed, and you stack with no options to discover, heal exotic weapons, etc. At least player should not depend on Research / War station. Would be nice to create his own.
 
-3.
+3. Ship. Depending on ship, you may or may not have specific weapons or equipments. Their types would share similarities with Механоидьі game. So will weapons & equipments. Light, heavy, rockets (unlimited, but with very slow re-charge). 
+
+Goes on...
