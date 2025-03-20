@@ -66,27 +66,27 @@ export class MainScene extends Scene {
         // This event comes from MenuScene
         this.game.events.on("start-game", () => {
             this.scene.stop("MenuScene");
-            this.scene.launch("HudScene", { remaining_time: this.game_over_timeout });
-            this.player.start();
-            this.enemy_blue.start();
+            this.scene.launch("ShipScene", { remaining_time: this.game_over_timeout });
+            // this.player.start();
+            // this.enemy_blue.start();
 
             // Game Over timeout
-            this.time.addEvent({
-                delay: 1000,
-                loop: true,
-                callback: () => {
-                    if (this.game_over_timeout === 0) {
-                        // You need remove the event listener to avoid duplicate events.
-                        this.game.events.removeListener("start-game");
-                        // It is necessary to stop the scenes launched in parallel.
-                        this.scene.stop("HudScene");
-                        this.scene.start("GameOverScene", { points: this.points });
-                    } else {
-                        this.game_over_timeout--;
-                        this.scene.get("HudScene").update_timeout(this.game_over_timeout);
-                    }
-                }
-            });
+            // this.time.addEvent({
+            //     delay: 1000,
+            //     loop: true,
+            //     callback: () => {
+            //         if (this.game_over_timeout === 0) {
+            //             // You need remove the event listener to avoid duplicate events.
+            //             this.game.events.removeListener("start-game");
+            //             // It is necessary to stop the scenes launched in parallel.
+            //             this.scene.stop("HudScene");
+            //             this.scene.start("GameOverScene", { points: this.points });
+            //         } else {
+            //             this.game_over_timeout--;
+            //             this.scene.get("HudScene").update_timeout(this.game_over_timeout);
+            //         }
+            //     }
+            // });
         });
     }
 

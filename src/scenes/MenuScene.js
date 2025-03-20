@@ -10,7 +10,6 @@ export class MenuScene extends Scene {
     }
 
     create() {
-
         // Background rectangles
         this.add.rectangle(
             0,

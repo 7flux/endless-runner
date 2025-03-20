@@ -11,6 +11,7 @@ export class Preloader extends Phaser.Scene {
         this.load.image("logo", "logo.png");
         this.load.image("floor");
         this.load.image("background", "background.png");
+        this.load.image("spaceship-equipment-background", 'screens/spaceship-equipment.png')
 
         this.load.image("player", "player/player.png");
         this.load.atlas("propulsion-fire", "player/propulsion/propulsion-fire.png", "player/propulsion/propulsion-fire_atlas.json");

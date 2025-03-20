@@ -5,6 +5,7 @@ import { HudScene } from "./scenes/HudScene.js";
 import { MainScene } from "./scenes/MainScene.js";
 import { MenuScene } from "./scenes/MenuScene.js";
 import { SplashScene } from "./scenes/SplashScene.js";
+import { ShipScene } from "./scenes/ShipScene.js";
 
 // More information about config: https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config = {
@@ -35,6 +36,7 @@ const config = {
         MainScene,
         MenuScene,
         HudScene,
+        ShipScene,
         GameOverScene
     ]
 };
