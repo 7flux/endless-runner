@@ -44,6 +44,9 @@ export default {
     },
     liveReload: true,
   },
+  experiments: {
+    css: true,
+  },
   plugins: [
     new rspack.HtmlRspackPlugin({
       template: './index.html'

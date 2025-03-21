@@ -6,20 +6,26 @@ import { MainScene } from "./scenes/MainScene.js";
 import { MenuScene } from "./scenes/MenuScene.js";
 import { SplashScene } from "./scenes/SplashScene.js";
 import { ShipScene } from "./scenes/ShipScene.js";
+import './index.css'
+
+export const sharedConfig = {
+  phaserContainerName: 'phaser-container'
+}
 
 // More information about config: https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config = {
     type: Phaser.AUTO,
     parent: "phaser-container",
-    width: 960,
-    height: 540,
+    width: window.innerWidth,
+    height: window.innerHeight,
     backgroundColor: "#1c172e",
     pixelArt: true,
     roundPixel: false,
-    max: {
-        width: 800,
-        height: 600,
-    },
+    // max: {
+    //     width: 800,
+    //     height: 600,
+    // },
+    // TODO:
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
