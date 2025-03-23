@@ -64,7 +64,7 @@ export class SpaceshipEquipment {
     inventoryGrid.className = 'inventory-grid';
 
     // Generate 30 inventory items
-    for (let i = 1; i <= 30; i++) {
+    for (let i = 1; i <= 100; i++) {
       const item = document.createElement("div");
       // TODO: different sizes
       if (i < 7) {

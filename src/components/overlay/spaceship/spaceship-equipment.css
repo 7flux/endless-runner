@@ -1,7 +1,7 @@
 .spaceship-equipment-overlay {
   position: fixed;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: space-between;
   top: 0;
   width: 100%;
@@ -10,13 +10,12 @@
 }
 
 .spaceship-equipment {
-  flex: 1;
+  flex: 3;
   background: rgba(44, 22, 40, 0.9); /* Dark semi-transparent blue */
 }
 
 .inventory-container {
-  height: 35%;
-  width: 100%;
+  flex: 2;
   background: rgba(20, 20, 50, 0.9); /* Dark semi-transparent blue */
   border-left: 2px solid #4f4fff;
   padding: 10px;
