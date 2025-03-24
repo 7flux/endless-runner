@@ -3,6 +3,7 @@ import rspack from '@rspack/core';
 
 const __dirname = import.meta.dirname;
 
+/** @type {import('@rspack/core').Configuration} */
 export default {
   mode: 'development',
   entry: {
@@ -35,14 +36,13 @@ export default {
     ]
   },
   devServer: {
-    allowedHosts: 'all',
-    static: true,
-    compress: true,
+    hot: true, // Enables HMR to prevent full reloads
+    liveReload: false, // Disables full page reloads
     port: 8080,
+    allowedHosts: 'all',
     client: {
-      logging: 'info',
-    },
-    liveReload: true,
+      reconnect: false,
+    }
   },
   experiments: {
     css: true,

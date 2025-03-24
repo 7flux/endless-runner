@@ -52,10 +52,9 @@ export class SpaceshipEquipment {
     const equipmentContainer = document.createElement('div');
     equipmentContainer.className = 'spaceship-equipment';
     
-    for (let weapon in equipments.weapons) {
+    // for (let weapon in equipments.weapons) {
       
-    }
-    
+    // }
     
     const inventoryContainer = document.createElement('div');
     const inventoryGrid = document.createElement('div');
