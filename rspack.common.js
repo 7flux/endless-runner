@@ -14,7 +14,7 @@ export default {
     filename: '[name].js',
     path: path.resolve(__dirname, 'build'),
   },
-  target: ['web', 'es2022'],
+  target: ['web'],
   optimization: {
     splitChunks: {
       cacheGroups: {
@@ -36,13 +36,9 @@ export default {
     ]
   },
   devServer: {
-    hot: true, // Enables HMR to prevent full reloads
-    liveReload: false, // Disables full page reloads
+    hot: true,
     port: 8080,
     allowedHosts: 'all',
-    client: {
-      reconnect: false,
-    }
   },
   experiments: {
     css: true,
@@ -58,7 +54,7 @@ export default {
           to: path.resolve(__dirname, 'build')
         }
       ],
-    })
+    }),
   ],
   resolve: {
     alias: {

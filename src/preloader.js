@@ -31,9 +31,9 @@ export class Preloader extends Phaser.Scene {
         this.load.image("knighthawks", "fonts/knight3.png");
 
         // Event to update the loading bar
-        this.load.on("progress", (progress) => {
-            console.log("Loading: " + Math.round(progress * 100) + "%");
-        });
+        // this.load.on("progress", (progress) => {
+        //     console.log("Loading: " + Math.round(progress * 100) + "%");
+        // });
     }
 
     create() {

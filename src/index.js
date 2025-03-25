@@ -1,50 +1,13 @@
-import { Game } from "phaser";
-import { Preloader } from "./preloader.js";
-import { GameOverScene } from "./scenes/GameOverScene.js";
-import { HudScene } from "./scenes/HudScene.js";
-import { MainScene } from "./scenes/MainScene.js";
-import { MenuScene } from "./scenes/MenuScene.js";
-import { SplashScene } from "./scenes/SplashScene.js";
-import { ShipScene } from "./scenes/ShipScene.js";
-import './index.css'
+import { createGame, destroyGame } from '@/utils/init.js';
 
-export const sharedConfig = {
-  phaserContainerName: 'phaser-container'
-}
+let gameInstance = createGame();
 
-// More information about config: https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
-const config = {
-    type: Phaser.AUTO,
-    parent: "phaser-container",
-    width: window.innerWidth,
-    height: window.innerHeight,
-    backgroundColor: "#1c172e",
-    pixelArt: true,
-    roundPixel: false,
-    // max: {
-    //     width: 800,
-    //     height: 600,
-    // },
-    // TODO:
-    scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
-    },
-    physics: {
-        default: "arcade",
-        arcade: {
-            gravity: { y: 0 }
-        }
-    },
-    scene: [
-        Preloader,
-        SplashScene,
-        MainScene,
-        MenuScene,
-        HudScene,
-        ShipScene,
-        GameOverScene
-    ]
-};
-
-new Game(config);
+// if (import.meta.webpackHot) {
+//   import.meta.webpackHot.accept('@/utils/init.js', () => {
+//       console.log('HMR: Reloading game...');
+//       if (gameInstance) {
+//           destroyGame(gameInstance);
+//       }
+//       gameInstance = createGame();
+//   });
+// }

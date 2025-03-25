@@ -1,7 +1,6 @@
 import { Scene } from "phaser";
 import { SpaceshipEquipment } from '@/components/overlay/spaceship/SpaceshipEquipment';
 
-// The HUD scene is the scene that shows the points and the remaining time.
 export class ShipScene extends Scene {
     
     remaining_time = 0;
@@ -19,8 +18,8 @@ export class ShipScene extends Scene {
     }
 
     create() {
-      this.add.image(0, 0, "spaceship-equipment-background").setOrigin(0, 0);
       SpaceshipEquipment.create();
+      this.add.image(0, 0, "spaceship-equipment-background").setOrigin(0, 0);
       this.points_text = this.add.bitmapText(10, 10, "pixelfont", "Gold: should see an amount", 24);
         // this.remaining_time_text = this.add.bitmapText(this.scale.width - 10, 10, "pixelfont", `REMAINING:${this.remaining_time}s`, 24)
             // .setOrigin(1, 0);

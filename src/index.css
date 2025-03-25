@@ -3,3 +3,14 @@ body {
   padding: 0;
   overflow: hidden;
 }
+
+.scroll-vertical {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #4f4fff #0a0a2a;
+}
+.scroll-horizontal {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #4f4fff #0a0a2a;
+}

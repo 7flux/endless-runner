@@ -58,10 +58,12 @@ export class SpaceshipEquipment {
     
     const inventoryContainer = document.createElement('div');
     const inventoryGrid = document.createElement('div');
+    const inventoryPreview = document.createElement('div');
     
-    inventoryContainer.className = 'inventory-container';
-    inventoryGrid.className = 'inventory-grid';
-
+    inventoryContainer.classList.add('inventory-container');
+    inventoryGrid.classList.add('inventory-grid', 'scroll-vertical');
+    inventoryPreview.classList.add('inventory-preview', 'scroll-vertical');
+    
     // Generate 30 inventory items
     for (let i = 1; i <= 100; i++) {
       const item = document.createElement("div");
@@ -72,12 +74,14 @@ export class SpaceshipEquipment {
         item.classList.add("inventory-item", "empty");
       }
 
-      item.innerHTML = `<p>${i}</p>`; // Number for now, can replace with icons
+      item.innerHTML = `<p>${i}</p>`; // TODO:
       inventoryGrid.appendChild(item);
     }
-    
+
     document.body.appendChild(menu);
+    
     inventoryContainer.appendChild(inventoryGrid);
+    inventoryContainer.appendChild(inventoryPreview);
     menu.appendChild(equipmentContainer);
     menu.appendChild(inventoryContainer);
   }
