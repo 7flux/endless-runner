@@ -49,7 +49,7 @@ export class MainScene extends Scene {
             this.enemy_blue.damage(this.player.x, this.player.y);
             this.points += 10;
             this.scene.get("HudScene")
-                .update_points(this.points);
+              .update_points(this.points);
         });
 
         // Overlap player with enemy bullets
@@ -60,13 +60,13 @@ export class MainScene extends Scene {
             this.cameras.main.flash(300, 255, 10, 10, false,);
             this.points -= 10;
             this.scene.get("HudScene")
-                .update_points(this.points);
+              .update_points(this.points);
         });
 
         // This event comes from MenuScene
         this.game.events.on("start-game", () => {
             this.scene.stop("MenuScene");
-            this.scene.launch("ShipScene", { remaining_time: this.game_over_timeout });
+            this.scene.launch("ShipPreviewScene", { remaining_time: this.game_over_timeout });
             // this.player.start();
             // this.enemy_blue.start();
 

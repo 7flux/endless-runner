@@ -1,6 +1,6 @@
-import { createGame, destroyGame } from '@/utils/init.js';
+import { createGame } from '@/utils/init.js';
 
-let gameInstance = createGame();
+createGame();
 
 // if (import.meta.webpackHot) {
 //   import.meta.webpackHot.accept('@/utils/init.js', () => {
