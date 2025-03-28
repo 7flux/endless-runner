@@ -76,9 +76,8 @@ export class SpaceshipEquipmentScene extends Phaser.Scene {
             const x = col * tileSize;
             const y = row * tileSize;
 
-            // Option 1: Using a loaded sprite
             const tile = this.add.rectangle(x, y, tileSize, tileSize, 0x222222, 1).setOrigin(0);
-            tile.setStrokeStyle(2, 0x8855ff, 0.5); // Adds a border
+            tile.setStrokeStyle(1, 0x8855ff);
             
             // Add tile to the container
             this.gridContainer.add(tile);
