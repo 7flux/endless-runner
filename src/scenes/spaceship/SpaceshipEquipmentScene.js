@@ -57,8 +57,8 @@ export class SpaceshipEquipmentScene extends Phaser.Scene {
     // inventoryContainer.setName('inventory-container');
 
     // // Create the inventory grid
-    // const inventoryGrid = this.add.grid(0, 0, 400, 400, 30, 30, 0xf03300, 0.5).setOrigin(0, 0);
-    // inventoryGrid.setName('inventory-grid');
+    // const ShipInventoryScene = this.add.grid(0, 0, 400, 400, 30, 30, 0xf03300, 0.5).setOrigin(0, 0);
+    // ShipInventoryScene.setName('inventory-grid');
 
 
     const tileSize = 50;
@@ -108,7 +108,7 @@ export class SpaceshipEquipmentScene extends Phaser.Scene {
     // inventoryPreview.setName('inventory-preview');
 
     // // Add inventory grid and preview to the inventory container
-    // inventoryContainer.add([inventoryGrid, inventoryPreview]);
+    // inventoryContainer.add([ShipInventoryScene, inventoryPreview]);
 
     // // Add equipment and inventory containers to the menu
     // menu.add([equipmentContainer, inventoryContainer]);
