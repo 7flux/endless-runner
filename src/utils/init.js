@@ -1,6 +1,4 @@
 import { Game } from "phaser";
-import { Preloader } from "@/preloader.js";
-import { GameOverScene } from "@/scenes/GameOverScene.js";
 import { HudScene } from "@/scenes/HudScene.js";
 import { MainScene } from "@/scenes/MainScene.js";
 import { MenuScene } from "@/scenes/MenuScene.js";
@@ -26,12 +24,12 @@ const config = {
   roundPixel: false,
   clearBeforeRender: false,
   max: {
-    width: 800,
+    width: 1000,
     height: 600,
   },
   scale: {
     mode: Phaser.Scale.FIT,
-    // autoCenter: Phaser.Scale.CENTER_BOTH
+    autoCenter: Phaser.Scale.CENTER_BOTH
   },
   physics: {
     default: "arcade",
@@ -40,12 +38,10 @@ const config = {
     }
   },
   scene: [
-    Preloader,
     SplashScene,
     MainScene,
     MenuScene,
     HudScene,
-    GameOverScene,
     ShipPreviewScene,
     ShipInventoryScene,
     // SpaceshipEquipmentScene,
