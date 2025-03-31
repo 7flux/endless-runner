@@ -1,23 +1,23 @@
-export class ShipInventoryScene extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, width, height, gridSize, cellWidth, cellHeight) {
-    super(scene, x, y);
+export class ShipInventoryScene extends Phaser.Scene {
+  width=400;
+  height=400;
+  x=0;
+  y=400;
+  cellWidth = 30;
+  cellHeight = 30;
+  gridSize = 30;
+  grid = Array(this.gridSize).fill(null).map(() => Array(this.gridSize).fill(null));
+  items = [];
+  selectedItem = null;
+  contextMenu = null;
 
-    this.scene = scene;
-    this.width = width;
-    this.height = height;
-    this.gridSize = gridSize;
-    this.cellWidth = cellWidth;
-    this.cellHeight = cellHeight;
-    this.grid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(null));
-    this.items = [];
-    this.selectedItem = null;
-    this.contextMenu = null;
-
-    this.createGrid();
-    scene.add.existing(this);
-
+  constructor() {
+    super({ key: 'ShipInventoryScene' });
+  }
+  
+  create() {
     // Create the inventory container
-    const inventoryContainer = new Phaser.Geom.Rectangle(x, y, width/2, height);
+    const inventoryContainer = new Phaser.Geom.Rectangle(this.x, this.y, this.width, this.height);
     this.setInteractive({
       hitArea: inventoryContainer,
       hitAreaStyle: Phaser.Geom.Rectangle.Contains,
@@ -27,7 +27,7 @@ export class ShipInventoryScene extends Phaser.GameObjects.Container {
     const graphics = new Phaser.GameObjects.Graphics(scene);
     const inventoryMask = new Phaser.Display.Masks.GeometryMask(scene, graphics.fillRect(x, y, width/2, height));
     this.setMask(inventoryMask);
-
+  
     this.scrollX = 0;
     this.scrollY = 0;
     this.scene.input.on('wheel', (pointer, deltaX, deltaY, deltaZ, event) => {
@@ -37,7 +37,7 @@ export class ShipInventoryScene extends Phaser.GameObjects.Container {
       this.scrollY = Phaser.Math.Clamp(this.scrollY, 0, (this.gridSize - height / cellHeight) * cellHeight);
       this.updateGridDisplay();
     });
-  }
+  }  
 
   createGrid() {
     for (let i = 0; i < this.gridSize; i++) {

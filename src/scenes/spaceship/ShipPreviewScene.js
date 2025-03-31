@@ -1,6 +1,4 @@
 import { Scene } from "phaser";
-import { SpaceshipEquipmentScene } from '@/scenes/spaceship/SpaceshipEquipmentScene.js';
-import { ShipInventoryScene } from '@/scenes/spaceship/ShipInventoryScene.js';
 
 export class ShipPreviewScene extends Scene {
   remaining_time = 0;
@@ -12,8 +10,7 @@ export class ShipPreviewScene extends Scene {
   }
 
   preload() {
-    this.load.image('logo', 'assets/sprites/phaser3-logo.png');
-    this.load.image('red', 'assets/particles/red.png');
+    this.load.image('spaceship-equipment-background', 'assets/spaceship/spaceship-equipment.png');
   }
 
   init(data) {
@@ -22,13 +19,13 @@ export class ShipPreviewScene extends Scene {
   }
 
   create() {
+    this.add.image(0, 0, "spaceship-equipment-background").setOrigin(0, 0).setSize(800, 400);
     // this.scene.add("SpaceshipEquipmentScene", SpaceshipEquipmentScene, true, {
     //   x: 0,
     //   y: 0,
     //   width: this.scale.width,
     //   height: this.scale.height,
     // });
-    this.inventory = new ShipInventoryScene(this, 100, 100, 600, 600, 100, 20, 20);
 
     this.points_text = this.add.bitmapText(10, 10, "pixelfont", "Gold: should see an amount", 24);
     // this.remaining_time_text = this.add.bitmapText(this.scale.width - 10, 10, "pixelfont", `REMAINING:${this.remaining_time}s`, 24)
