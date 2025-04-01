@@ -56,7 +56,6 @@ export class MainScene extends Scene {
         //       .update_points(this.points);
         // });
 
-        this.scene.start("Preloader");
         this.scene.launch("ShipPreviewScene", { remaining_time: this.game_over_timeout });
     }
 

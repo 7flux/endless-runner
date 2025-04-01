@@ -1,4 +1,5 @@
 import { Game } from "phaser";
+import { Preloader } from "@/preloader.js";
 import { HudScene } from "@/scenes/HudScene.js";
 import { MainScene } from "@/scenes/MainScene.js";
 import { MenuScene } from "@/scenes/MenuScene.js";
@@ -38,6 +39,7 @@ const config = {
     }
   },
   scene: [
+    Preloader,
     SplashScene,
     MainScene,
     MenuScene,
