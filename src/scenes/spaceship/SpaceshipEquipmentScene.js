@@ -1,6 +1,6 @@
 import { ShipInventoryScene } from '@/scenes/spaceship/ShipInventoryScene';
-import './spaceship-equipment.css';
 import { ShipPreviewScene } from '@/scenes/spaceship/ShipPreviewScene';
+import './spaceship-equipment.css';
 
 const equipments = {
   weapons: [

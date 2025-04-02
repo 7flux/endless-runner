@@ -44,9 +44,7 @@ const config = {
     MainScene,
     MenuScene,
     HudScene,
-    ShipPreviewScene,
-    ShipInventoryScene,
-    // SpaceshipEquipmentScene,
+    SpaceshipEquipmentScene
   ]
 };
 

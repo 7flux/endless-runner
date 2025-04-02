@@ -16,28 +16,40 @@ export class ShipInventoryScene extends Phaser.Scene {
   }
   
   create() {
-    // Create the inventory container
-    const inventoryContainer = new Phaser.Geom.Rectangle(this.x, this.y, this.width, this.height);
-    this.setInteractive({
-      hitArea: inventoryContainer,
-      hitAreaStyle: Phaser.Geom.Rectangle.Contains,
+    // Create an interactive zone for the inventory container
+    const inventoryZone = this.add.zone(this.x, this.y, this.width, this.height).setOrigin(0);
+    inventoryZone.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(0, 0, this.width, this.height),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
       draggable: false,
     });
+
+    // Create a graphics object to define the mask
+    const graphics = this.add.graphics();
+    graphics.fillStyle(0xffffff);
+    graphics.fillRect(this.x, this.y, this.width / 2, this.height);
+    const inventoryMask = new Phaser.Display.Masks.GeometryMask(this, graphics);
+
+    // Since Zones aren’t regular display objects, they don’t support masks directly.
+    // Instead of applying the mask to the inventoryZone, we create a container for all
+    // visual inventory elements and apply the mask to that container.
+    this.inventoryContainer = this.add.container(this.x, this.y);
+    this.inventoryContainer.setSize(this.width, this.height);
+    this.inventoryContainer.mask = inventoryMask;
+
+    // Optionally, if you still need the interactive zone for input, keep the inventoryZone
+    // but render all visuals inside inventoryContainer.
     
-    const graphics = new Phaser.GameObjects.Graphics(scene);
-    const inventoryMask = new Phaser.Display.Masks.GeometryMask(scene, graphics.fillRect(x, y, width/2, height));
-    this.setMask(inventoryMask);
-  
     this.scrollX = 0;
     this.scrollY = 0;
-    this.scene.input.on('wheel', (pointer, deltaX, deltaY, deltaZ, event) => {
+    this.input.on('wheel', (pointer, deltaX, deltaY, deltaZ, event) => {
       this.scrollX += deltaX;
       this.scrollY += deltaY;
-      this.scrollX = Phaser.Math.Clamp(this.scrollX, 0, (this.gridSize - width / cellWidth) * cellWidth);
-      this.scrollY = Phaser.Math.Clamp(this.scrollY, 0, (this.gridSize - height / cellHeight) * cellHeight);
+      this.scrollX = Phaser.Math.Clamp(this.scrollX, 0, (this.gridSize - this.width / this.cellWidth) * this.cellWidth);
+      this.scrollY = Phaser.Math.Clamp(this.scrollY, 0, (this.gridSize - this.height / this.cellHeight) * this.cellHeight);
       this.updateGridDisplay();
     });
-  }  
+  }
 
   createGrid() {
     for (let i = 0; i < this.gridSize; i++) {

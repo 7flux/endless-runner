@@ -19,11 +19,10 @@ export class ShipPreviewScene extends Scene {
   }
 
   create() {
-    // I'd like this image to be placed .setOrigin(0, 0), so that image occupies half of the screen (width 100%, height 50%):
     this.add.image(0, 0, "spaceship-equipment-background").setOrigin(0, 0).setDisplaySize(this.scale.width, this.scale.height / 2);
  
     // make that image interactive. I need it to have drag & drop support, so that I can drag and drop the spaceship equipment, e.g. by placing or removing an equipment from it's slot. slot gonna be a rectangle 40x30 pixels. Create a container (mask) for it, not the image itself. The container should be the same size as the image, and the image should be a child of the container. The container should be draggable, and the background image should not be draggable, only the equipments (also will have their image + mask).
-    
+
     this.spaceship_equipment_background = this.add.image(0, 0, "spaceship-equipment-background").setOrigin(0, 0).setDisplaySize(this.scale.width, this.scale.height / 2);
     this.spaceship_equipment_background.setInteractive(new Phaser.Geom.Rectangle(0, 0, this.scale.width, this.scale.height / 2), Phaser.Geom.Rectangle.Contains);
     this.input.setDraggable(this.spaceship_equipment_background);

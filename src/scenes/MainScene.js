@@ -56,7 +56,7 @@ export class MainScene extends Scene {
         //       .update_points(this.points);
         // });
 
-        this.scene.launch("ShipPreviewScene", { remaining_time: this.game_over_timeout });
+        this.scene.launch("SpaceshipEquipmentScene", { remaining_time: this.game_over_timeout });
     }
 
     update() {
