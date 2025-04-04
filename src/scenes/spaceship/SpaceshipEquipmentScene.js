@@ -1,4 +1,4 @@
-import { ShipInventoryScene } from '@/scenes/spaceship/ShipInventoryScene';
+import { ShipInventory } from '@/scenes/spaceship/ShipInventory';
 import { ShipPreviewScene } from '@/scenes/spaceship/ShipPreviewScene';
 import './spaceship-equipment.css';
 
@@ -43,10 +43,11 @@ export class SpaceshipEquipmentScene extends Phaser.Scene {
   preload() {}
   
   create() {
-    const inventoryScene = new ShipInventoryScene();
-    const previewScene = new ShipPreviewScene();
-    this.scene.add('ShipInventoryScene', inventoryScene, true);
-    this.scene.add('ShipPreviewScene', previewScene, true);
+    this.shipInventory = new ShipInventory(this, 50, 100);
+
+    // this.shipInventory.container.setVisible(false)
+    // const previewScene = new ShipPreviewScene();
+    // this.scene.add('ShipPreviewScene', previewScene, true);
   }
 
   cleanup() {

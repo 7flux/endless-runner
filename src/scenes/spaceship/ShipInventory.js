@@ -1,11 +1,13 @@
-export class ShipInventoryScene extends Phaser.Scene {
+export class ShipInventory {
   width=400;
   height=400;
-  x=0;
-  y=400;
   cellWidth=30;
   cellHeight=30;
   grid = Array(30).fill(null).map(() => Array(7).fill(null));
+  scene;
+  x;
+  y;
+  itemSprites = [];
 
   items = [{
     name: 'Ion Cannon',
@@ -32,18 +34,11 @@ export class ShipInventoryScene extends Phaser.Scene {
     }
   }];
 
-  constructor() {
-    super({ key: 'ShipInventoryScene' });
-  }
-  
-  preload() {
-    // No assets to preload for now
-  }
+  constructor(scene, x, y) {
+    this.scene = scene;
+    this.x = x;
+    this.y = y;
 
-  create() {
-    // Create the inventory container
-    this.inventoryContainer = this.add.container(this.x, this.y);
-    
     // Create grid background
     this.createGrid();
     
@@ -58,31 +53,36 @@ export class ShipInventoryScene extends Phaser.Scene {
 
     console.log(this)
   }
+  
+  preload() {
+    // No assets to preload for now
+  }
+
 
   createGrid() {
     // Create temporary graphics for grid
-    const gridGraphics = this.add.graphics();
+    const gridGraphics = this.scene.add.graphics();
     
     // Generate a texture from a single cell for better performance
     gridGraphics.clear();
     gridGraphics.lineStyle(1, 0x44ff88, 1);
     gridGraphics.strokeRect(0, 0, this.cellWidth, this.cellHeight);
     gridGraphics.generateTexture('gridCellTexture', this.cellWidth, this.cellHeight);
-
+    
     // Create a tiled sprite using the cell texture
-    this.gridSprite = this.add.tileSprite(
+    this.scene.gridSprite = this.scene.add.tileSprite(
       this.x, this.y,
       7 * this.cellWidth, 30 * this.cellHeight,
       'gridCellTexture'
     );
+    this.scene.gridSprite.setOrigin(0, 0);
     
     // Create a sprite using the generated texture
-    this.gridSprite = this.add.sprite(this.x, this.y, 'gridTexture');
-    this.gridSprite.setOrigin(0, 0);
-    
+    this.scene.add.sprite(this.x, this.y, 'gridTexture');
+
     // Add the sprite to the container
-    this.inventoryContainer.add(this.gridSprite);
-    
+    // TODO: fails here...
+    this.scene.inventoryContainer.add(this.scene.gridSprite);
     // Destroy the temporary graphics object
     // gridGraphics.destroy();
   }
@@ -102,7 +102,7 @@ export class ShipInventoryScene extends Phaser.Scene {
         const [gridX, gridY] = position;
 
         // Create item visual
-        const itemGraphics = this.add.graphics();
+        const itemGraphics = this.scene.add.graphics();
         itemGraphics.fillStyle(0x0000ff, 0.5);
         itemGraphics.fillRect(
           gridX * this.cellWidth, 
@@ -121,7 +121,7 @@ export class ShipInventoryScene extends Phaser.Scene {
         }
         
         // Add text label
-        const text = this.add.text(
+        const text = this.scene.add.text(
           gridX * this.cellWidth + 5, 
           gridY * this.cellHeight + 5, 
           item.name, 
@@ -129,7 +129,7 @@ export class ShipInventoryScene extends Phaser.Scene {
         );
         
         // Group item graphics and text
-        const itemGroup = this.add.container(0, 0, [itemGraphics, text]);
+        const itemGroup = this.scene.add.container(0, 0, [itemGraphics, text]);
         
         // Make item interactive
         itemGroup.setInteractive(new Phaser.Geom.Rectangle(
@@ -141,7 +141,7 @@ export class ShipInventoryScene extends Phaser.Scene {
         
         // Hover effects
         itemGroup.on('pointerover', () => {
-          this.input.setDefaultCursor('pointer');
+          this.scene.input.setDefaultCursor('pointer');
           itemGraphics.clear();
           itemGraphics.fillStyle(0x3333ff, 0.7);
           itemGraphics.fillRect(
@@ -153,7 +153,7 @@ export class ShipInventoryScene extends Phaser.Scene {
         });
         
         itemGroup.on('pointerout', () => {
-          this.input.setDefaultCursor('default');
+          this.scene.input.setDefaultCursor('default');
           itemGraphics.clear();
           itemGraphics.fillStyle(0x0000ff, 0.5);
           itemGraphics.fillRect(
@@ -167,10 +167,10 @@ export class ShipInventoryScene extends Phaser.Scene {
         // Click for preview and drag
         itemGroup.on('pointerdown', () => {
           this.showItemPreview(item);
-          this.input.setDraggable(itemGroup);
+          this.scene.input.setDraggable(itemGroup);
         });
 
-        this.inventoryContainer.add(itemGroup);
+        this.scene.inventoryContainer.add(itemGroup);
         this.itemSprites.push({ item, graphics: itemGraphics, text, container: itemGroup, gridPosition: position });
       }
     }
@@ -198,15 +198,15 @@ export class ShipInventoryScene extends Phaser.Scene {
   }
 
   createPreviewPanel() {
-    this.previewPanel = this.add.container(7 * this.cellWidth + 20, 0);
+    this.previewPanel = this.scene.add.container(7 * this.cellWidth + 20, 0);
     
-    const bg = this.add.graphics();
+    const bg = this.scene.add.graphics();
     bg.fillStyle(0x222222, 0.8);
     bg.fillRect(0, 0, 200, 400);
     this.previewPanel.add(bg);
     
-    this.previewTitle = this.add.text(10, 10, 'Item Preview', { fontSize: '18px', fill: '#fff' });
-    this.previewDetails = this.add.text(10, 40, '', { fontSize: '14px', fill: '#fff', wordWrap: { width: 180 } });
+    this.previewTitle = this.scene.add.text(10, 10, 'Item Preview', { fontSize: '18px', fill: '#fff' });
+    this.previewDetails = this.scene.add.text(10, 40, '', { fontSize: '14px', fill: '#fff', wordWrap: { width: 180 } });
     
     this.previewPanel.add([this.previewTitle, this.previewDetails]);
   }
@@ -234,12 +234,12 @@ export class ShipInventoryScene extends Phaser.Scene {
   }
 
   setupDragAndDrop() {
-    this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+    this.scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
       gameObject.x = dragX;
       gameObject.y = dragY;
     });
     
-    this.input.on('dragend', (pointer, gameObject) => {
+    this.scene.input.on('dragend', (pointer, gameObject) => {
       const item = this.itemSprites.find(sprite => sprite.container === gameObject);
       
       if (item) {
@@ -303,19 +303,19 @@ export class ShipInventoryScene extends Phaser.Scene {
   }
 
   setupScrolling() {
-    const mask = this.add.graphics();
+    const mask = this.scene.add.graphics();
     mask.fillStyle(0xffffff);
     mask.fillRect(this.x, this.y, 7 * this.cellWidth, this.height);
     
-    this.inventoryContainer.mask = new Phaser.Display.Masks.GeometryMask(this, mask);
+    this.scene.inventoryContainer.mask = new Phaser.Display.Masks.GeometryMask(this, mask);
     
-    this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+    this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
       if (pointer.x >= this.x && pointer.x <= this.x + 7 * this.cellWidth &&
           pointer.y >= this.y && pointer.y <= this.y + this.height) {
-        this.inventoryContainer.y -= deltaY * 0.5;
+        this.scene.inventoryContainer.y -= deltaY * 0.5;
         
         const minY = this.y + this.height - 30 * this.cellHeight;
-        this.inventoryContainer.y = Phaser.Math.Clamp(this.inventoryContainer.y, minY, this.y);
+        this.scene.inventoryContainer.y = Phaser.Math.Clamp(this.scene.inventoryContainer.y, minY, this.y);
       }
     });
   }

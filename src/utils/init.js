@@ -5,7 +5,7 @@ import { MainScene } from "@/scenes/MainScene.js";
 import { MenuScene } from "@/scenes/MenuScene.js";
 import { SplashScene } from "@/scenes/SplashScene.js";
 import { ShipPreviewScene } from "@/scenes/spaceship/ShipPreviewScene.js";
-import { ShipInventoryScene } from "@/scenes/spaceship/ShipInventoryScene.js";
+import { ShipInventoryScene } from "@/scenes/spaceship/ShipInventory.js";
 import { SpaceshipEquipmentScene } from "@/scenes/spaceship/SpaceshipEquipmentScene";
 import '@/index.css'
 
