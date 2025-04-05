@@ -44,7 +44,6 @@ export class SpaceshipEquipmentScene extends Phaser.Scene {
   
   create() {
     this.shipInventory = new ShipInventory(this, 50, 100);
-
     // this.shipInventory.container.setVisible(false)
     // const previewScene = new ShipPreviewScene();
     // this.scene.add('ShipPreviewScene', previewScene, true);
