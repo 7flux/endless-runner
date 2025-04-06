@@ -202,16 +202,54 @@ export class ShipInventory {
     return null;
   }
 
+  // last prompt
+  // setupBottomHalfLayout(gameHeight) {
+  //   // Position at bottom half of screen
+  //   this.container.setPosition(this.container.x, gameHeight / 2);
+    
+  //   // Create background for bottom section
+  //   const bg = this.scene.add.graphics();
+  //   bg.fillStyle(0x333344, 0.8);
+  //   bg.fillRect(0, 0, this.width + 250, gameHeight / 2);
+  //   this.container.add(bg);
+  //   bg.setPosition(0, 0);
+    
+  //   // Left side: inventory (already being created)
+  //   // Make sure the grid and inventory are properly positioned
+  //   this.gridSprite.setPosition(10, 10);
+  //   this.inventoryContainer.setPosition(10, 10);
+    
+  //   // Right side: preview panel
+  //   this.createPreviewPanel();
+  //   this.previewPanel.setPosition(7 * this.cellWidth + 20, 10);
+    
+  //   // Add separator between inventory and preview
+  //   const separator = this.scene.add.graphics();
+  //   separator.lineStyle(2, 0x44ff88, 1);
+  //   separator.lineBetween(
+  //     7 * this.cellWidth + 10, 5,
+  //     7 * this.cellWidth + 10, gameHeight / 2 - 5
+  //   );
+  //   this.container.add(separator);
+    
+  //   // Setup scrolling for inventory
+  //   this.setupScrolling();
+    
+  //   return this.container;
+  // }
+  
+
   createPreviewPanel() {
-    this.previewPanel = this.container.add.container(7 * this.cellWidth + 20, 0);
+    this.previewPanel = this.scene.add.container(7 * this.cellWidth + 20, 0);
+    this.container.add(this.previewPanel);
     
     const bg = this.scene.add.graphics();
     bg.fillStyle(0x222222, 0.8);
     bg.fillRect(0, 0, 200, 400);
     this.previewPanel.add(bg);
     
-    this.previewTitle = this.container.add.text(10, 10, 'Item Preview', { fontSize: '18px', fill: '#fff' });
-    this.previewDetails = this.container.add.text(10, 40, '', { fontSize: '14px', fill: '#fff', wordWrap: { width: 180 } });
+    this.previewTitle = this.scene.add.text(10, 10, 'Item Preview', { fontSize: '18px', fill: '#fff' });
+    this.previewDetails = this.scene.add.text(10, 40, '', { fontSize: '14px', fill: '#fff', wordWrap: { width: 180 } });
     
     this.previewPanel.add([this.previewTitle, this.previewDetails]);
   }
