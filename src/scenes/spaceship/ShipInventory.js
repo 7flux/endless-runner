@@ -8,6 +8,7 @@ export class ShipInventory {
   x;
   y;
   itemSprites = [];
+  container;
 
   items = [{
     name: 'Ion Cannon',
@@ -44,9 +45,9 @@ export class ShipInventory {
     
     // Place items in the grid
     this.placeItemsInGrid();
-    
-    // // Create preview panel
-    // this.createPreviewPanel();
+
+    // Create preview panel
+    this.createPreviewPanel();
     
     // // Set up scrolling
     // this.setupScrolling();
@@ -206,7 +207,7 @@ export class ShipInventory {
   // setupBottomHalfLayout(gameHeight) {
   //   // Position at bottom half of screen
   //   this.container.setPosition(this.container.x, gameHeight / 2);
-    
+
   //   // Create background for bottom section
   //   const bg = this.scene.add.graphics();
   //   bg.fillStyle(0x333344, 0.8);
@@ -237,9 +238,9 @@ export class ShipInventory {
     
   //   return this.container;
   // }
-  
 
   createPreviewPanel() {
+    console.log('createPreviewPanel')
     this.previewPanel = this.scene.add.container(7 * this.cellWidth + 20, 0);
     this.container.add(this.previewPanel);
     
@@ -255,6 +256,7 @@ export class ShipInventory {
   }
 
   showItemPreview(item) {
+    console.log('showItemPreview')
     this.previewTitle.setText(item.name);
     
     let details = `Type: ${item.properties.type}\n`;
