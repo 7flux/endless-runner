@@ -5,14 +5,17 @@ export class ShipInventory {
   cellHeight=30;
   grid = Array(30).fill(null).map(() => Array(7).fill(null));
   scene;
-  x;
-  y;
+  containerOrigin = {
+    x: 0,
+    y: 0
+  };
   itemSprites = [];
   container;
 
   items = [{
     name: 'Ion Cannon',
     properties: {
+      id: 'ion_cannon_001',
       type: 'Weapon',
       weight: 10,
       size: [1, 3],
@@ -25,6 +28,7 @@ export class ShipInventory {
   },{
     name: 'Thruster',
     properties: {
+      id: 'thruster_001',
       type: 'Engine',
       weight: 10,
       size: [3, 3],
@@ -39,9 +43,15 @@ export class ShipInventory {
   constructor(scene, x, y) {
     this.scene = scene;
     this.container = this.scene.add.container(x, y);
+    this.containerOrigin.x = x;
+    this.containerOrigin.y = y;
 
     // Create grid background
     this.createGrid();
+
+    // Create inventory container for items
+    this.inventoryContainer = this.scene.add.container(0, 0);
+    this.container.add(this.inventoryContainer);
     
     // Place items in the grid
     this.placeItemsInGrid();
@@ -59,16 +69,15 @@ export class ShipInventory {
     // No assets to preload for now
   }
 
-
   createGrid() {
-    // Create temporary graphics for grid
-    const gridGraphics = this.scene.add.graphics();
-    
-    // Generate a texture from a single cell for better performance
-    gridGraphics.lineStyle(1, 0x44ff88, 1);
-    gridGraphics.strokeRect(0, 0, this.cellWidth, this.cellHeight);
-    gridGraphics.generateTexture('gridCellTexture', this.cellWidth, this.cellHeight);
-    
+    // Generate a texture from a single cell for better performance (directly)
+    const cellTexture = this.scene.textures.createCanvas('gridCellTexture', this.cellWidth, this.cellHeight);
+    const context = cellTexture.getContext();
+    context.strokeStyle = '#44ff88';
+    context.lineWidth = 1;
+    context.strokeRect(0, 0, this.cellWidth, this.cellHeight);
+    cellTexture.refresh();
+
     // Create a tiled sprite using the cell texture
     this.gridSprite = this.scene.add.tileSprite(
       0, 0, // Position relative to container
@@ -79,10 +88,6 @@ export class ShipInventory {
 
     // Add the sprite to the container
     this.container.add(this.gridSprite);
-    
-    // Create inventory container for items (was missing)
-    this.inventoryContainer = this.scene.add.container(0, 0);
-    this.container.add(this.inventoryContainer);
   }
 
   placeItemsInGrid() {
@@ -94,10 +99,10 @@ export class ShipInventory {
       const [width, height] = item.properties.size;
 
       // Find a free space in the grid
-      const position = this.findFreeGridSpace(width, height);
+      const startingPosition = this.findFreeGridSpace(width, height);
 
-      if (position) {
-        const [gridX, gridY] = position;
+      if (startingPosition) {
+        const [gridX, gridY] = startingPosition;
 
         // Create item visual
         const itemGraphics = this.scene.add.graphics();
@@ -108,13 +113,11 @@ export class ShipInventory {
           width * this.cellWidth, 
           height * this.cellHeight
         );
-        
+
         // Store item in grid
         for (let y = gridY; y < gridY + height; y++) {
           for (let x = gridX; x < gridX + width; x++) {
-            if (y < 30 && x < 7) {
-              this.grid[y][x] = { item, gridX, gridY, width, height };
-            }
+            this.grid[y][x] = { item, gridX, gridY, width, height };
           }
         }
         
@@ -176,7 +179,7 @@ export class ShipInventory {
           graphics: itemGraphics, 
           text, 
           container: itemGroup, 
-          gridPosition: position 
+          gridPosition: startingPosition 
         });
       }
     }
@@ -241,7 +244,7 @@ export class ShipInventory {
 
   createPreviewPanel() {
     console.log('createPreviewPanel')
-    this.previewPanel = this.scene.add.container(7 * this.cellWidth + 20, 0);
+    this.previewPanel = this.scene.add.container(7 * this.cellWidth + 2, 0);
     this.container.add(this.previewPanel);
     
     const bg = this.scene.add.graphics();
@@ -283,41 +286,34 @@ export class ShipInventory {
       gameObject.x = dragX;
       gameObject.y = dragY;
     });
-    
+
     this.scene.input.on('dragend', (_, gameObject) => {
       const item = this.itemSprites.find(sprite => sprite.container === gameObject);
-      
+
       if (item) {
-        const gridX = Math.floor((gameObject.x - this.x) / this.cellWidth);
-        const gridY = Math.floor((gameObject.y - this.y) / this.cellHeight);
-        
+        const gridX = Math.floor((gameObject.x) / this.cellWidth);
+        const gridY = Math.floor((gameObject.y) / this.cellHeight);
+
         if (this.isValidPlacement(item.item, gridX, gridY, item.gridPosition)) {
-          // Clear old position
           const [oldX, oldY] = item.gridPosition;
           const [width, height] = item.item.properties.size;
           
-          for (let y = oldY; y < oldY + height; y++) {
-            for (let x = oldX; x < oldX + width; x++) {
-              if (y < 30 && x < 7) this.grid[y][x] = null;
-            }
-          }
-          
-          // Add to new position
-          for (let y = gridY; y < gridY + height; y++) {
-            for (let x = gridX; x < gridX + width; x++) {
-              if (y < 30 && x < 7) {
-                this.grid[y][x] = { item: item.item, gridX, gridY, width, height };
-              }
-            }
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              // remove from grid
+              this.grid[oldY + y][oldX + x] = null; 
+              // add
+              this.grid[gridY + y][gridX + x] = { item: item.item, gridX, gridY, width, height };
+            } 
           }
           
           item.gridPosition = [gridX, gridY];
-          gameObject.x = this.x + gridX * this.cellWidth;
-          gameObject.y = this.y + gridY * this.cellHeight;
+          gameObject.x = /* this.containerOrigin.x +  */gridX * this.cellWidth;
+          gameObject.y = /* this.containerOrigin.y +  */gridY * this.cellHeight;
         } else {
           // Return to original position
-          gameObject.x = this.x + item.gridPosition[0] * this.cellWidth;
-          gameObject.y = this.y + item.gridPosition[1] * this.cellHeight;
+          gameObject.x = /* this.containerOrigin.x +  */item.gridPosition[0] * this.cellWidth;
+          gameObject.y = /* this.containerOrigin.y +  */item.gridPosition[1] * this.cellHeight;
         }
       }
     });

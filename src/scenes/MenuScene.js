@@ -7,9 +7,9 @@ export class MenuScene extends Phaser.Scene {
   }
 
   create() {
-    let startButton = this.add.text(350, 250, 'Start Game', { fontSize: '32px', fill: '#fff' })
-      .setInteractive()
-      .on('pointerdown', () => this.scene.start('GameScene')); // add scene
+    // let startButton = this.add.text(350, 250, 'Start Game', { fontSize: '32px', fill: '#fff' })
+    //   .setInteractive()
+    //   .on('pointerdown', () => this.scene.start('GameScene')); // add scene
   }
 
   showOptions() {
