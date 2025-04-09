@@ -1,8 +1,8 @@
 export class ShipInventory {
-  width=400;
-  height=400;
-  cellWidth=30;
-  cellHeight=30;
+  width = 400;
+  height = 400;
+  cellWidth = 30;
+  cellHeight = 30;
   grid = Array(30).fill(null).map(() => Array(7).fill(null));
   scene;
   containerOrigin = {
@@ -25,7 +25,7 @@ export class ShipInventory {
       range: 100,
       speed: 5,
     }
-  },{
+  }, {
     name: 'Thruster',
     properties: {
       id: 'thruster_001',
@@ -52,19 +52,19 @@ export class ShipInventory {
     // Create inventory container for items
     this.inventoryContainer = this.scene.add.container(0, 0);
     this.container.add(this.inventoryContainer);
-    
+
     // Place items in the grid
     this.placeItemsInGrid();
 
     // Create preview panel
     this.createPreviewPanel();
-    
+
     // // Set up scrolling
     // this.setupScrolling();
 
     console.log(this)
   }
-  
+
   preload() {
     // No assets to preload for now
   }
@@ -108,9 +108,9 @@ export class ShipInventory {
         const itemGraphics = this.scene.add.graphics();
         itemGraphics.fillStyle(0x0000ff, 0.5);
         itemGraphics.fillRect(
-          gridX * this.cellWidth, 
-          gridY * this.cellHeight, 
-          width * this.cellWidth, 
+          gridX * this.cellWidth,
+          gridY * this.cellHeight,
+          width * this.cellWidth,
           height * this.cellHeight
         );
 
@@ -120,70 +120,69 @@ export class ShipInventory {
             this.grid[y][x] = { item, gridX, gridY, width, height };
           }
         }
-        
+
         // Add text label - correct creation through scene
         const text = this.scene.add.text(
-          gridX * this.cellWidth + 5, 
-          gridY * this.cellHeight + 5, 
-          item.name, 
+          gridX * this.cellWidth + 5,
+          gridY * this.cellHeight + 5,
+          item.name,
           { fontSize: '12px', fill: '#fff', wordWrap: { width: width * this.cellWidth - 10 } }
         );
-        
+
         // Group item graphics and text
         const itemGroup = this.scene.add.container(0, 0);
         itemGroup.add([itemGraphics, text]);
-        
+
         // Make item interactive
         itemGroup.setInteractive(new Phaser.Geom.Rectangle(
-          gridX * this.cellWidth, 
-          gridY * this.cellHeight, 
-          width * this.cellWidth, 
+          gridX * this.cellWidth,
+          gridY * this.cellHeight,
+          width * this.cellWidth,
           height * this.cellHeight
         ), Phaser.Geom.Rectangle.Contains);
-        
+
         // Hover effects
         itemGroup.on('pointerover', () => {
           this.scene.input.setDefaultCursor('pointer');
           itemGraphics.clear();
           itemGraphics.fillStyle(0x3333ff, 0.7);
           itemGraphics.fillRect(
-            gridX * this.cellWidth, 
-            gridY * this.cellHeight, 
-            width * this.cellWidth, 
+            gridX * this.cellWidth,
+            gridY * this.cellHeight,
+            width * this.cellWidth,
             height * this.cellHeight
           );
+          this.showItemPreview(item);
         });
-        
+        this.scene.input.setDraggable(itemGroup);
+
         itemGroup.on('pointerout', () => {
           this.scene.input.setDefaultCursor('default');
           itemGraphics.clear();
           itemGraphics.fillStyle(0x0000ff, 0.5);
           itemGraphics.fillRect(
-            gridX * this.cellWidth, 
-            gridY * this.cellHeight, 
-            width * this.cellWidth, 
+            gridX * this.cellWidth,
+            gridY * this.cellHeight,
+            width * this.cellWidth,
             height * this.cellHeight
           );
         });
 
-        // Click for preview and drag
-        itemGroup.on('pointerdown', () => {
-          this.showItemPreview(item);
-          this.scene.input.setDraggable(itemGroup);
-        });
+
+        // itemGroup.on('pointerdown', () => {});
 
         // Add to inventory container
         this.inventoryContainer.add(itemGroup);
-        this.itemSprites.push({ 
-          item, 
-          graphics: itemGraphics, 
-          text, 
-          container: itemGroup, 
-          gridPosition: startingPosition 
+        this.itemSprites.push({
+          item,
+          graphics: itemGraphics,
+          text,
+          container: itemGroup,
+          gridPosition: startingPosition
         });
       }
     }
-    
+
     this.setupDragAndDrop();
   }
 
@@ -191,7 +190,7 @@ export class ShipInventory {
     for (let y = 0; y < 30; y++) {
       for (let x = 0; x < 7 - width + 1; x++) {
         let free = true;
-        
+
         for (let dy = 0; dy < height && free; dy++) {
           for (let dx = 0; dx < width && free; dx++) {
             if (this.grid[y + dy][x + dx] !== null) {
@@ -199,7 +198,7 @@ export class ShipInventory {
             }
           }
         }
-        
+
         if (free) return [x, y];
       }
     }
@@ -217,16 +216,16 @@ export class ShipInventory {
   //   bg.fillRect(0, 0, this.width + 250, gameHeight / 2);
   //   this.container.add(bg);
   //   bg.setPosition(0, 0);
-    
+
   //   // Left side: inventory (already being created)
   //   // Make sure the grid and inventory are properly positioned
   //   this.gridSprite.setPosition(10, 10);
   //   this.inventoryContainer.setPosition(10, 10);
-    
+
   //   // Right side: preview panel
   //   this.createPreviewPanel();
   //   this.previewPanel.setPosition(7 * this.cellWidth + 20, 10);
-    
+
   //   // Add separator between inventory and preview
   //   const separator = this.scene.add.graphics();
   //   separator.lineStyle(2, 0x44ff88, 1);
@@ -235,10 +234,10 @@ export class ShipInventory {
   //     7 * this.cellWidth + 10, gameHeight / 2 - 5
   //   );
   //   this.container.add(separator);
-    
+
   //   // Setup scrolling for inventory
   //   this.setupScrolling();
-    
+
   //   return this.container;
   // }
 
@@ -246,27 +245,27 @@ export class ShipInventory {
     console.log('createPreviewPanel')
     this.previewPanel = this.scene.add.container(7 * this.cellWidth + 2, 0);
     this.container.add(this.previewPanel);
-    
+
     const bg = this.scene.add.graphics();
     bg.fillStyle(0x222222, 0.8);
     bg.fillRect(0, 0, 200, 400);
     this.previewPanel.add(bg);
-    
+
     this.previewTitle = this.scene.add.text(10, 10, 'Item Preview', { fontSize: '18px', fill: '#fff' });
     this.previewDetails = this.scene.add.text(10, 40, '', { fontSize: '14px', fill: '#fff', wordWrap: { width: 180 } });
-    
+
     this.previewPanel.add([this.previewTitle, this.previewDetails]);
   }
 
   showItemPreview(item) {
     console.log('showItemPreview')
     this.previewTitle.setText(item.name);
-    
+
     let details = `Type: ${item.properties.type}\n`;
     details += `Size: ${item.properties.size[0]}x${item.properties.size[1]}\n`;
     details += `Weight: ${item.properties.weight}\n\n`;
     details += item.properties.description + '\n\n';
-    
+
     // Type-specific properties
     if (item.properties.type === 'Weapon') {
       details += `Damage: ${item.properties.damage}\n`;
@@ -277,11 +276,13 @@ export class ShipInventory {
       details += `Speed: ${item.properties.speed}\n`;
       details += `Fuel Consumption: ${item.properties.fuelConsumption}\n`;
     }
-    
+
     this.previewDetails.setText(details);
   }
 
+
   setupDragAndDrop() {
+    // game object will have x,y of the parent container + it's own deviations based on initial location
     this.scene.input.on('drag', (_, gameObject, dragX, dragY) => {
       gameObject.x = dragX;
       gameObject.y = dragY;
@@ -297,16 +298,16 @@ export class ShipInventory {
         if (this.isValidPlacement(item.item, gridX, gridY, item.gridPosition)) {
           const [oldX, oldY] = item.gridPosition;
           const [width, height] = item.item.properties.size;
-          
+
           for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
               // remove from grid
-              this.grid[oldY + y][oldX + x] = null; 
+              this.grid[oldY + y][oldX + x] = null;
               // add
               this.grid[gridY + y][gridX + x] = { item: item.item, gridX, gridY, width, height };
-            } 
+            }
           }
-          
+
           item.gridPosition = [gridX, gridY];
           gameObject.x = /* this.containerOrigin.x +  */gridX * this.cellWidth;
           gameObject.y = /* this.containerOrigin.y +  */gridY * this.cellHeight;
@@ -319,27 +320,39 @@ export class ShipInventory {
     });
   }
 
+  /* rules 
+    1. moving out of inventory container:
+      1.1. check if it's in the equipment area
+      1.2. if it's not, and drag&drop ends - return to original position
+      1.3. if it is:
+        1.3.1 - check if it can placed to equipments area: requirenments met, like skills or item is suited there. 
+        1.3.2 - otherwise return to original position
+    2. within inventory container:
+      2.1. check if it's in the grid area
+      2.2. check if it doesn't overlap other items
+  */
+
   isValidPlacement(item, gridX, gridY, currentPos) {
     const [width, height] = item.properties.size;
     const [currentX, currentY] = currentPos;
-    
+
     // Check bounds
     if (gridX < 0 || gridY < 0 || gridX + width > 7 || gridY + height > 30) {
       return false;
     }
-    
+
     // Check for collisions
     for (let y = gridY; y < gridY + height; y++) {
       for (let x = gridX; x < gridX + width; x++) {
-        const isCurrentCell = x >= currentX && x < currentX + width && 
-                             y >= currentY && y < currentY + height;
-        
+        const isCurrentCell = x >= currentX && x < currentX + width &&
+          y >= currentY && y < currentY + height;
+
         if (!isCurrentCell && this.grid[y][x] !== null) {
           return false;
         }
       }
     }
-    
+
     return true;
   }
 
@@ -347,14 +360,14 @@ export class ShipInventory {
     const mask = this.scene.add.graphics();
     mask.fillStyle(0xffffff);
     mask.fillRect(this.x, this.y, 7 * this.cellWidth, this.height);
-    
+
     this.container.inventoryContainer.mask = new Phaser.Display.Masks.GeometryMask(this, mask);
-    
+
     this.container.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
       if (pointer.x >= this.x && pointer.x <= this.x + 7 * this.cellWidth &&
-          pointer.y >= this.y && pointer.y <= this.y + this.height) {
+        pointer.y >= this.y && pointer.y <= this.y + this.height) {
         this.container.inventoryContainer.y -= deltaY * 0.5;
-        
+
         const minY = this.y + this.height - 30 * this.cellHeight;
         this.container.inventoryContainer.y = Phaser.Math.Clamp(this.container.inventoryContainer.y, minY, this.y);
       }
