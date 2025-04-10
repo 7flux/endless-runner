@@ -166,6 +166,7 @@ export class ShipInventory {
             width * this.cellWidth,
             height * this.cellHeight
           );
+          this.cleanUpTooltip();
         });
 
 
@@ -257,29 +258,173 @@ export class ShipInventory {
     this.previewPanel.add([this.previewTitle, this.previewDetails]);
   }
 
-  showItemPreview(item) {
-    console.log('showItemPreview')
-    this.previewTitle.setText(item.name);
+  // showSpaceshipPreview(item) {
+  //   console.log('showItemPreview')
+  //   this.previewTitle.setText(item.name);
 
+  //   let details = `Type: ${item.properties.type}\n`;
+  //   details += `Size: ${item.properties.size[0]}x${item.properties.size[1]}\n`;
+  //   details += `Weight: ${item.properties.weight}\n\n`;
+  //   details += item.properties.description + '\n\n';
+
+  //   // Type-specific properties
+  //   if (item.properties.type === 'Weapon') {
+  //     details += `Damage: ${item.properties.damage}\n`;
+  //     details += `Fire Rate: ${item.properties.fireRate}\n`;
+  //     details += `Range: ${item.properties.range}\n`;
+  //   } else if (item.properties.type === 'Engine') {
+  //     details += `Thrust: ${item.properties.thrust}\n`;
+  //     details += `Speed: ${item.properties.speed}\n`;
+  //     details += `Fuel Consumption: ${item.properties.fuelConsumption}\n`;
+  //   }
+
+  //   this.previewDetails.setText(details);
+  // }
+
+  cleanUpTooltip() {
+    if (this.tooltipScrollHandler) {
+      this.scene.input.off('wheel', this.tooltipScrollHandler);
+      this.tooltipScrollHandler = null;
+    }
+    this.tooltip.destroy();
+  }
+
+  showItemPreview(item) {
+    // Clean up existing tooltip if present
+    if (this.tooltip) {
+      this.cleanUpTooltip();
+    }
+
+    // Create tooltip container
+    this.tooltip = this.scene.add.container();
+    this.tooltip.setDepth(1000); // Ensure it's on top
+
+    // Create background
+    const tooltipBg = this.scene.add.graphics();
+    tooltipBg.fillStyle(0x222222, 0.9);
+    tooltipBg.lineStyle(1, 0x44ff88);
+
+    // Create title text
+    const titleText = this.scene.add.text(10, 10, item.name, {
+      fontSize: '16px',
+      fontWeight: 'bold',
+      fill: '#ffffff'
+    });
+
+    // Build details text
     let details = `Type: ${item.properties.type}\n`;
     details += `Size: ${item.properties.size[0]}x${item.properties.size[1]}\n`;
     details += `Weight: ${item.properties.weight}\n\n`;
     details += item.properties.description + '\n\n';
 
-    // Type-specific properties
+    // Add type-specific properties
     if (item.properties.type === 'Weapon') {
       details += `Damage: ${item.properties.damage}\n`;
       details += `Fire Rate: ${item.properties.fireRate}\n`;
       details += `Range: ${item.properties.range}\n`;
+      details += `Speed: ${item.properties.speed}\n`;
     } else if (item.properties.type === 'Engine') {
       details += `Thrust: ${item.properties.thrust}\n`;
       details += `Speed: ${item.properties.speed}\n`;
       details += `Fuel Consumption: ${item.properties.fuelConsumption}\n`;
     }
 
-    this.previewDetails.setText(details);
-  }
+    // Create details text
+    const detailsText = this.scene.add.text(10, titleText.height + 20, details, {
+      fontSize: '14px',
+      fill: '#ffffff',
+      wordWrap: { width: 240 }
+    });
 
+    // Create content container
+    const contentContainer = this.scene.add.container(0, 0);
+    contentContainer.add([titleText, detailsText]);
+
+    // Calculate dimensions
+    const padding = 20;
+    const tooltipWidth = Math.max(titleText.width, detailsText.width) + padding * 2;
+    const contentHeight = titleText.height + detailsText.height + 30;
+    const tooltipHeight = Math.min(400, contentHeight);
+
+    // Draw background
+    tooltipBg.fillRoundedRect(0, 0, tooltipWidth, tooltipHeight, 8);
+    tooltipBg.strokeRoundedRect(0, 0, tooltipWidth, tooltipHeight, 8);
+
+    // Add elements to tooltip
+    this.tooltip.add(tooltipBg);
+    this.tooltip.add(contentContainer);
+
+    // Position tooltip
+    const pointer = this.scene.input.activePointer;
+    let tooltipX = pointer.x + 15;
+    let tooltipY = pointer.y + 15;
+
+    // Adjust position if would be off-screen
+    const gameWidth = this.scene.scale.width;
+    const gameHeight = this.scene.scale.height;
+
+    if (tooltipX + tooltipWidth > gameWidth) {
+      tooltipX = pointer.x - tooltipWidth - 15;
+    }
+
+    if (tooltipY + tooltipHeight > gameHeight) {
+      tooltipY = pointer.y - tooltipHeight - 15;
+    }
+
+    this.tooltip.setPosition(tooltipX, tooltipY);
+
+    // Set up scrolling if content is too large
+    if (contentHeight > tooltipHeight) {
+      // Create mask shape
+      const maskShape = this.scene.make.graphics();
+      maskShape.fillStyle(0xffffff);
+      maskShape.fillRect(0, 0, tooltipWidth, tooltipHeight);
+
+      // Create mask and apply to content
+      const mask = new Phaser.Display.Masks.GeometryMask(this.scene, maskShape);
+      contentContainer.setMask(mask);
+
+      // Position mask with the tooltip
+      maskShape.x = tooltipX;
+      maskShape.y = tooltipY;
+
+      // Add scroll indicator
+      const scrollIndicator = this.scene.add.graphics();
+      scrollIndicator.fillStyle(0x44ff88, 0.7);
+      scrollIndicator.fillRoundedRect(tooltipWidth - 15, 10, 5, 50, 2);
+      this.tooltip.add(scrollIndicator);
+
+      // Set up scroll handling
+      let scrollY = 0;
+      const maxScroll = contentHeight - tooltipHeight + padding;
+
+      this.tooltipScrollHandler = (pointer, gameObjects, deltaX, deltaY) => {
+        if (
+          pointer.x >= tooltipX &&
+          pointer.x <= tooltipX + tooltipWidth &&
+          pointer.y >= tooltipY &&
+          pointer.y <= tooltipY + tooltipHeight
+        ) {
+          scrollY = Phaser.Math.Clamp(
+            scrollY + deltaY * 0.5,
+            0,
+            maxScroll
+          );
+
+          contentContainer.y = -scrollY;
+
+          // Update scroll indicator position
+          const scrollRatio = scrollY / maxScroll;
+          const indicatorTravel = tooltipHeight - 70;
+          scrollIndicator.y = 10 + (scrollRatio * indicatorTravel);
+        }
+      };
+
+      this.scene.input.on('wheel', this.tooltipScrollHandler);
+    }
+
+    return this.tooltip;
+  }
 
   setupDragAndDrop() {
     // game object will have x,y of the parent container + it's own deviations based on initial location
