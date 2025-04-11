@@ -141,6 +141,7 @@ export class ShipInventory {
           height * this.cellHeight
         ), Phaser.Geom.Rectangle.Contains);
 
+        // TODO: make it separate function
         // Hover effects
         itemGroup.on('pointerover', () => {
           this.scene.input.setDefaultCursor('pointer');
@@ -429,6 +430,8 @@ export class ShipInventory {
   setupDragAndDrop() {
     // game object will have x,y of the parent container + it's own deviations based on initial location
     this.scene.input.on('drag', (_, gameObject, dragX, dragY) => {
+      this.cleanUpTooltip();
+      console.log('this.inventoryContainer', this.inventoryContainer);
       gameObject.x = dragX;
       gameObject.y = dragY;
     });
