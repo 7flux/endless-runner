@@ -37,6 +37,16 @@ export class ShipInventory {
       fuelConsumption: 1,
       thrust: 10,
     }
+  }, {
+    name: 'Molecule Scanner',
+    properties: {
+      id: 'scanner_001',
+      type: 'Scanner',
+      weight: 2,
+      size: [2, 1],
+      description: 'Description of Molecule Scanner',
+      power: 2,
+    }
   }];
 
   /** @param {Phaser.Scene} scene - parent scene */
@@ -61,7 +71,6 @@ export class ShipInventory {
 
     // // Set up scrolling
     // this.setupScrolling();
-
     console.log(this)
   }
 
@@ -141,7 +150,7 @@ export class ShipInventory {
           height * this.cellHeight
         ), Phaser.Geom.Rectangle.Contains);
 
-        // TODO: make it separate function
+        // TODO: make it a separate function
         // Hover effects
         itemGroup.on('pointerover', () => {
           this.scene.input.setDefaultCursor('pointer');
@@ -170,7 +179,6 @@ export class ShipInventory {
           this.cleanUpTooltip();
         });
 
-
         // itemGroup.on('pointerdown', () => {});
 
         // Add to inventory container
@@ -180,7 +188,8 @@ export class ShipInventory {
           graphics: itemGraphics,
           text,
           container: itemGroup,
-          gridPosition: startingPosition
+          gridPosition: startingPosition,
+          xyDeviations: { x: startingPosition[0]*this.cellWidth, y: startingPosition[1]*this.cellHeight },
         });
       }
     }
@@ -428,10 +437,9 @@ export class ShipInventory {
   }
 
   setupDragAndDrop() {
-    // game object will have x,y of the parent container + it's own deviations based on initial location
+    // TODO: game object will have it's own coordinates deviation based on initial location (if real x = 60px, it will think during any events, that x is actully 0px, since it's it's starting position)
     this.scene.input.on('drag', (_, gameObject, dragX, dragY) => {
       this.cleanUpTooltip();
-      console.log('this.inventoryContainer', this.inventoryContainer);
       gameObject.x = dragX;
       gameObject.y = dragY;
     });
@@ -440,8 +448,8 @@ export class ShipInventory {
       const item = this.itemSprites.find(sprite => sprite.container === gameObject);
 
       if (item) {
-        const gridX = Math.floor((gameObject.x) / this.cellWidth);
-        const gridY = Math.floor((gameObject.y) / this.cellHeight);
+        const gridX = Math.floor((gameObject.x) / this.cellWidth/*  + item.xyDeviations.x */);
+        const gridY = Math.floor((gameObject.y) / this.cellHeight/*  + item.xyDeviations.y */);
 
         if (this.isValidPlacement(item.item, gridX, gridY, item.gridPosition)) {
           const [oldX, oldY] = item.gridPosition;
@@ -485,7 +493,7 @@ export class ShipInventory {
     const [currentX, currentY] = currentPos;
 
     // Check bounds
-    if (gridX < 0 || gridY < 0 || gridX + width > 7 || gridY + height > 30) {
+    if (gridX < 0 || gridY < 0 || gridX + width > 7 || gridY + height > 29) {
       return false;
     }
 
