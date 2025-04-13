@@ -152,7 +152,8 @@ export class ShipInventory {
 
         // TODO: make it a separate function
         // Hover effects
-        itemGroup.on('pointerover', () => {
+        itemGroup.on('pointerover', (e) => {
+          console.log('pointerover', e)
           this.scene.input.setDefaultCursor('pointer');
           itemGraphics.clear();
           itemGraphics.fillStyle(0x3333ff, 0.7);
@@ -189,7 +190,7 @@ export class ShipInventory {
           text,
           container: itemGroup,
           gridPosition: startingPosition,
-          xyDeviations: { x: startingPosition[0]*this.cellWidth, y: startingPosition[1]*this.cellHeight },
+          xyDeviations: { x: gridX*this.cellWidth, y: gridY*this.cellHeight },
         });
       }
     }
@@ -448,10 +449,10 @@ export class ShipInventory {
       const item = this.itemSprites.find(sprite => sprite.container === gameObject);
 
       if (item) {
-        const gridX = Math.floor((gameObject.x) / this.cellWidth/*  + item.xyDeviations.x */);
-        const gridY = Math.floor((gameObject.y) / this.cellHeight/*  + item.xyDeviations.y */);
+        const gridX = Math.floor((gameObject.x + item.xyDeviations.x) / this.cellWidth);
+        const gridY = Math.floor((gameObject.y + item.xyDeviations.y) / this.cellHeight);
 
-        if (this.isValidPlacement(item.item, gridX, gridY, item.gridPosition)) {
+        if (this.isValidPlacement(item.item, gridX, gridY, item.gridPosition, item.xyDeviations)) {
           const [oldX, oldY] = item.gridPosition;
           const [width, height] = item.item.properties.size;
 
@@ -465,12 +466,12 @@ export class ShipInventory {
           }
 
           item.gridPosition = [gridX, gridY];
-          gameObject.x = /* this.containerOrigin.x +  */gridX * this.cellWidth;
-          gameObject.y = /* this.containerOrigin.y +  */gridY * this.cellHeight;
+          gameObject.x = gridX * this.cellWidth - item.xyDeviations.x;
+          gameObject.y = gridY * this.cellHeight - item.xyDeviations.y;
         } else {
           // Return to original position
-          gameObject.x = /* this.containerOrigin.x +  */item.gridPosition[0] * this.cellWidth;
-          gameObject.y = /* this.containerOrigin.y +  */item.gridPosition[1] * this.cellHeight;
+          gameObject.x = item.gridPosition[0] * this.cellWidth;
+          gameObject.y = item.gridPosition[1] * this.cellHeight;
         }
       }
     });
