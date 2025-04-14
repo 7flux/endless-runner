@@ -153,7 +153,6 @@ export class ShipInventory {
         // TODO: make it a separate function
         // Hover effects
         itemGroup.on('pointerover', (e) => {
-          console.log('pointerover', e)
           this.scene.input.setDefaultCursor('pointer');
           itemGraphics.clear();
           itemGraphics.fillStyle(0x3333ff, 0.7);
@@ -470,8 +469,8 @@ export class ShipInventory {
           gameObject.y = gridY * this.cellHeight - item.xyDeviations.y;
         } else {
           // Return to original position
-          gameObject.x = item.gridPosition[0] * this.cellWidth;
-          gameObject.y = item.gridPosition[1] * this.cellHeight;
+          gameObject.x = item.gridPosition[0] * this.cellWidth - item.xyDeviations.x;
+          gameObject.y = item.gridPosition[1] * this.cellHeight - item.xyDeviations.y;
         }
       }
     });
