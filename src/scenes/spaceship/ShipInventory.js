@@ -1,9 +1,11 @@
 export class ShipInventory {
   width = 400;
   height = 400;
-  cellWidth = 30;
-  cellHeight = 30;
-  grid = Array(30).fill(null).map(() => Array(7).fill(null));
+  cellWidth = 40;
+  cellHeight = 40;
+  cellsInRow = this.width / this.cellWidth;
+  totalCellRows = 40;
+  grid = Array(this.totalCellRows).fill(null).map(() => Array(this.cellsInRow).fill(null));
   scene;
   containerOrigin = {
     x: 0,
@@ -90,7 +92,7 @@ export class ShipInventory {
     // Create a tiled sprite using the cell texture
     this.gridSprite = this.scene.add.tileSprite(
       0, 0, // Position relative to container
-      7 * this.cellWidth, 30 * this.cellHeight,
+      this.cellsInRow * this.cellWidth, this.totalCellRows * this.cellHeight,
       'gridCellTexture'
     );
     this.gridSprite.setOrigin(0, 0);
@@ -197,13 +199,13 @@ export class ShipInventory {
     this.setupDragAndDrop();
   }
 
-  findFreeGridSpace(width, height) {
-    for (let y = 0; y < 30; y++) {
-      for (let x = 0; x < 7 - width + 1; x++) {
+  findFreeGridSpace(arrayWidth, arrayHeight) {
+    for (let y = 0; y < this.totalCellRows; y++) {
+      for (let x = 0; x < this.cellsInRow - arrayWidth + 1; x++) {
         let free = true;
 
-        for (let dy = 0; dy < height && free; dy++) {
-          for (let dx = 0; dx < width && free; dx++) {
+        for (let dy = 0; dy < arrayHeight && free; dy++) {
+          for (let dx = 0; dx < arrayWidth && free; dx++) {
             if (this.grid[y + dy][x + dx] !== null) {
               free = false;
             }
@@ -254,7 +256,7 @@ export class ShipInventory {
 
   createPreviewPanel() {
     console.log('createPreviewPanel')
-    this.previewPanel = this.scene.add.container(7 * this.cellWidth + 2, 0);
+    this.previewPanel = this.scene.add.container(this.cellsInRow * this.cellWidth + 2, 0);
     this.container.add(this.previewPanel);
 
     const bg = this.scene.add.graphics();

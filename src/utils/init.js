@@ -23,13 +23,18 @@ const config = {
   pixelArt: true,
   roundPixel: false,
   clearBeforeRender: false,
+  min: {
+    width: 800,
+    height: 600,
+  },
   max: {
-    width: 1000,
+    width: 800,
     height: 600,
   },
   scale: {
     mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    zoom: 1,
   },
   physics: {
     default: "arcade",
