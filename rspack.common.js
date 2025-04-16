@@ -32,7 +32,11 @@ export default {
         test: /\.(js|jsx|vue)$/,
         exclude: /node_modules/,
         type: 'javascript/auto'
-      }
+      },
+      {
+        test: /\.(css)$/,
+        type: 'css/auto',
+      },
     ]
   },
   devServer: {

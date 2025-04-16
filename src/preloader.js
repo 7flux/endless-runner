@@ -6,8 +6,6 @@ export class Preloader extends Phaser.Scene {
   }
 
   preload() {
-    // Load all the assets
-    this.load.setPath("assets");
     // Fonts
     this.load.bitmapFont("pixelfont", "fonts/pixelfont.png", "fonts/pixelfont.xml");
     this.load.image("knighthawks", "fonts/knight3.png");

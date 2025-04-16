@@ -4,7 +4,6 @@ import { HudScene } from "@/scenes/HudScene.js";
 import { MainScene } from "@/scenes/MainScene.js";
 import { MenuScene } from "@/scenes/MenuScene.js";
 import { SplashScene } from "@/scenes/SplashScene.js";
-import { ShipPreviewScene } from "@/scenes/spaceship/ShipPreviewScene.js";
 import { SpaceshipEquipmentScene } from "@/scenes/spaceship/SpaceshipEquipmentScene";
 import '@/index.css'
 
@@ -26,6 +25,9 @@ const config = {
   min: {
     width: 800,
     height: 600,
+  },
+  loader: {
+    baseURL: 'assets/'
   },
   max: {
     width: 800,
