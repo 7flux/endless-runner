@@ -14,12 +14,7 @@ export class ShipPreview {
     this.containerOrigin.x = x;
     this.containerOrigin.y = y;
 
-    this.preload();
     this.create();
-  }
-
-  preload() {
-    this.scene.load.image('spaceship-equipment-background', 'spaceship/spaceship-equipment.png');
   }
 
   create() {

@@ -40,7 +40,9 @@ export class SpaceshipEquipmentScene extends Phaser.Scene {
     super({ key: 'SpaceshipEquipmentScene' });
   }
 
-  preload() {}
+  preload() {
+    this.load.image('spaceship-equipment-background', 'spaceship/spaceship-equipment.png');
+  }
   
   create() {
     this.shipInventory = new ShipInventory(this, 0, 400);

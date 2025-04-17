@@ -61,11 +61,11 @@ export function createGame() {
 
 export function destroyGame(game) {
   if (game) {
-      console.log('Destroying game instance...');
-      game.destroy(true); // Destroy the game and remove the canvas
-      const container = document.getElementById(sharedConfig.phaserContainerName);
-      if (container) {
-        container.innerHTML = '';
-      }
+    console.log('Destroying game instance...');
+    game.destroy(true); // Destroy the game and remove the canvas
+    const container = document.getElementById(sharedConfig.phaserContainerName);
+    if (container) {
+      container.innerHTML = '';
+    }
   }
 }
