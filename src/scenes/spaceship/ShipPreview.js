@@ -18,7 +18,7 @@ export class ShipPreview {
   }
 
   create() {
-    this.scene.add.image(0, 0, "spaceship-equipment-background").setOrigin(0, 0).setDisplaySize(800, 400/* this.scene.scale.width, this.scene.scale.height / 2 */);
+    this.scene.add.image(0, 0, "spaceship-equipment-background").setOrigin(0, 0).setDisplaySize(this.scene.scale.width, this.scene.scale.height / 2);
  
     // make that image interactive. I need it to have drag & drop support, so that I can drag and drop the spaceship equipment, e.g. by placing or removing an equipment from it's slot. slot gonna be a rectangle 40x30 pixels. Create a container (mask) for it, not the image itself. The container should be the same size as the image, and the image should be a child of the container. The container should be draggable, and the background image should not be draggable, only the equipments (also will have their image + mask).
 

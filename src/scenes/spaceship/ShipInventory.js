@@ -444,6 +444,7 @@ export class ShipInventory {
       this.cleanUpTooltip();
       gameObject.x = dragX;
       gameObject.y = dragY;
+      console.log(gameObject.x, gameObject.y, dragX, dragY);
     });
 
     this.scene.input.on('dragend', (_, gameObject) => {
@@ -453,7 +454,7 @@ export class ShipInventory {
         const gridX = Math.floor((gameObject.x + item.xyDeviations.x) / this.cellWidth);
         const gridY = Math.floor((gameObject.y + item.xyDeviations.y) / this.cellHeight);
 
-        if (this.isValidPlacement(item.item, gridX, gridY, item.gridPosition, item.xyDeviations)) {
+        if (this.isValidPlacement(item.item, gridX, gridY, item.gridPosition)) {
           const [oldX, oldY] = item.gridPosition;
           const [width, height] = item.item.properties.size;
 
@@ -495,7 +496,7 @@ export class ShipInventory {
     const [currentX, currentY] = currentPos;
 
     // Check bounds
-    if (gridX < 0 || gridY < 0 || gridX + width > 7 || gridY + height > 29) {
+    if (gridX < 0 || gridY < 0 || gridX + width > this.cellsInRow || gridY + height > this.totalCellRows) {
       return false;
     }
 
@@ -515,19 +516,20 @@ export class ShipInventory {
   }
 
   setupScrolling() {
+    const { x, y } = this.containerOrigin;
     const mask = this.scene.add.graphics();
     mask.fillStyle(0xffffff);
-    mask.fillRect(this.x, this.y, 7 * this.cellWidth, this.height);
+    mask.fillRect(x, y, 7 * this.cellWidth, this.height);
 
-    this.container.inventoryContainer.mask = new Phaser.Display.Masks.GeometryMask(this, mask);
+    this.inventoryContainer.mask = new Phaser.Display.Masks.GeometryMask(this.scene, mask);
 
-    this.container.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
-      if (pointer.x >= this.x && pointer.x <= this.x + 7 * this.cellWidth &&
-        pointer.y >= this.y && pointer.y <= this.y + this.height) {
-        this.container.inventoryContainer.y -= deltaY * 0.5;
+    this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+      if (pointer.x >= this.x && pointer.x <= x + 7 * this.cellWidth &&
+        pointer.y >= this.y && pointer.y <= y + this.height) {
+        this.inventoryContainer.y -= deltaY * 0.5;
 
         const minY = this.y + this.height - 30 * this.cellHeight;
-        this.container.inventoryContainer.y = Phaser.Math.Clamp(this.container.inventoryContainer.y, minY, this.y);
+        this.inventoryContainer.y = Phaser.Math.Clamp(this.inventoryContainer.y, minY, y);
       }
     });
   }
