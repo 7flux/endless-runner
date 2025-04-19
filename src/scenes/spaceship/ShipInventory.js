@@ -1,3 +1,40 @@
+// TODO: figure out the interface ot force using same size on grid item (e.g. engine is 3x3, so no engine can be bigger, probably)
+const shipEquipmentConfig = [
+  {
+    type: 'Weapon 1',
+    location: {
+      x: 600,
+      y: -300,
+    },
+    size: {
+      x: 3,
+      y: 1,
+    }
+  },
+  {
+    type: 'Weapon 2',
+    location: {
+      x: 600,
+      y: -150,
+    },
+    size: {
+      x: 3,
+      y: 1,
+    }
+  },
+  {
+    type: 'Engine',
+    location: {
+      x: 100,
+      y: -200,
+    },
+    size: {
+      x: 3,
+      y: 3,
+    }
+  },
+]
+
 export class ShipInventory {
   width = 400;
   height = 400;
@@ -61,6 +98,9 @@ export class ShipInventory {
     // Create grid background
     this.createGrid();
 
+    // Create equipment container
+    this.createEquipmentContainer();
+
     // Create inventory container for items
     this.inventoryContainer = this.scene.add.container(0, 0);
     this.container.add(this.inventoryContainer);
@@ -76,8 +116,21 @@ export class ShipInventory {
     console.log(this)
   }
 
-  preload() {
-    // No assets to preload for now
+  createEquipmentContainer() {
+    this.equipmentContainer = this.scene.add.container(0, 0);
+    const itemGraphics = this.scene.add.graphics();
+
+    itemGraphics.fillStyle(0x0000ff, 0.5);
+    // thruster 3x3
+    itemGraphics.fillRect(
+      100,
+      -200,
+      3 * this.cellWidth,
+      3 * this.cellHeight
+    );
+
+    this.equipmentContainer.add(itemGraphics);
+    this.container.add(this.equipmentContainer);
   }
 
   createGrid() {
@@ -453,6 +506,11 @@ export class ShipInventory {
       if (item) {
         const gridX = Math.floor((gameObject.x + item.xyDeviations.x) / this.cellWidth);
         const gridY = Math.floor((gameObject.y + item.xyDeviations.y) / this.cellHeight);
+
+        // means it's the Equipment screen
+        if (gridY < 0) {
+
+        }
 
         if (this.isValidPlacement(item.item, gridX, gridY, item.gridPosition)) {
           const [oldX, oldY] = item.gridPosition;

@@ -13,7 +13,6 @@ export class ShipPreview {
     this.container = this.scene.add.container(x, y);
     this.containerOrigin.x = x;
     this.containerOrigin.y = y;
-
     this.create();
   }
 
