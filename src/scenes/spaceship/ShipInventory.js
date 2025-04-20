@@ -2,36 +2,18 @@
 const shipEquipmentConfig = [
   {
     type: 'Weapon 1',
-    location: {
-      x: 600,
-      y: -300,
-    },
-    size: {
-      x: 3,
-      y: 1,
-    }
+    location: [600, -300],
+    size: [3, 1],
   },
   {
     type: 'Weapon 2',
-    location: {
-      x: 600,
-      y: -150,
-    },
-    size: {
-      x: 3,
-      y: 1,
-    }
+    location: [600, -150],
+    size: [3, 1],
   },
   {
     type: 'Engine',
-    location: {
-      x: 100,
-      y: -200,
-    },
-    size: {
-      x: 3,
-      y: 3,
-    }
+    location: [100, -200],
+    size: [3, 3],
   },
 ]
 
@@ -118,18 +100,29 @@ export class ShipInventory {
 
   createEquipmentContainer() {
     this.equipmentContainer = this.scene.add.container(0, 0);
-    const itemGraphics = this.scene.add.graphics();
 
-    itemGraphics.fillStyle(0x0000ff, 0.5);
-    // thruster 3x3
-    itemGraphics.fillRect(
-      100,
-      -200,
-      3 * this.cellWidth,
-      3 * this.cellHeight
-    );
+    for (let i = 0; i < shipEquipmentConfig.length; i++) {
+      const itemGraphics = this.scene.add.graphics();
 
-    this.equipmentContainer.add(itemGraphics);
+      const [x, y, width, height] = [...shipEquipmentConfig[i].location, shipEquipmentConfig[i].size[0] * this.cellWidth, shipEquipmentConfig[i].size[1] * this.cellHeight];
+
+      itemGraphics.fillStyle(0x00aaaa, 0.3);
+      itemGraphics.fillRect(x, y, width, height);
+
+      const itemGroup = this.scene.add.container(0, 0);
+      itemGroup.add([itemGraphics]);
+      // Make item interactive
+      itemGroup.setInteractive(new Phaser.Geom.Rectangle(x, y, width, height), Phaser.Geom.Rectangle.Contains);
+      itemGroup.on('pointerover', (e) => {
+        this.scene.input.setDefaultCursor('pointer');
+        itemGraphics.clear();
+        itemGraphics.fillStyle(0x3333ff, 0.7);
+        itemGraphics.fillRect(x, y, width, height);
+      });
+
+      this.equipmentContainer.add(itemGroup);
+    }
+
     this.container.add(this.equipmentContainer);
   }
 
@@ -233,8 +226,6 @@ export class ShipInventory {
           );
           this.cleanUpTooltip();
         });
-
-        // itemGroup.on('pointerdown', () => {});
 
         // Add to inventory container
         this.inventoryContainer.add(itemGroup);
