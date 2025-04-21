@@ -1,19 +1,45 @@
+const state = {
+  idle: 'idle',
+  dragging: 'dragging',
+  dropping: 'dropping',
+}
+
 // TODO: figure out the interface ot force using same size on grid item (e.g. engine is 3x3, so no engine can be bigger, probably)
 const shipEquipmentConfig = [
   {
     type: 'Weapon 1',
-    location: [600, -300],
-    size: [3, 1],
+    location: [625, -325],
+    size: [4, 1],
+    current: {
+      id: 'ion_cannon_000',
+      type: 'Weapon',
+      weight: 10,
+      description: 'Ion Cannon. Most standard weapon',
+      fireRate: 1,
+      damage: 5,
+      range: 100,
+      speed: 5,
+    }
   },
   {
     type: 'Weapon 2',
-    location: [600, -150],
+    location: [700, -125],
     size: [3, 1],
+    current: null,
   },
   {
     type: 'Engine',
-    location: [100, -200],
+    location: [125, -225],
     size: [3, 3],
+    current: {
+      id: 'thruster_000',
+      type: 'Engine',
+      weight: 10,
+      description: 'Thruster. Standard',
+      speed: 5,
+      fuelConsumption: 1,
+      thrust: 10,
+    }
   },
 ]
 
@@ -95,7 +121,6 @@ export class ShipInventory {
 
     // // Set up scrolling
     // this.setupScrolling();
-    console.log(this)
   }
 
   createEquipmentContainer() {
@@ -117,6 +142,12 @@ export class ShipInventory {
         this.scene.input.setDefaultCursor('pointer');
         itemGraphics.clear();
         itemGraphics.fillStyle(0x3333ff, 0.7);
+        itemGraphics.fillRect(x, y, width, height);
+      });
+      itemGroup.on('pointerout', () => {
+        this.scene.input.setDefaultCursor('default');
+        itemGraphics.clear();
+        itemGraphics.fillStyle(0x00aaaa, 0.3);
         itemGraphics.fillRect(x, y, width, height);
       });
 
@@ -231,6 +262,7 @@ export class ShipInventory {
         this.inventoryContainer.add(itemGroup);
         this.itemSprites.push({
           item,
+          state: state.idle,
           graphics: itemGraphics,
           text,
           container: itemGroup,
@@ -488,7 +520,19 @@ export class ShipInventory {
       this.cleanUpTooltip();
       gameObject.x = dragX;
       gameObject.y = dragY;
-      console.log(gameObject.x, gameObject.y, dragX, dragY);
+
+      // means it's in the Equipment screen
+      // TODO: fixme
+      if (dragY < 0) {
+        const itemType = gameObject.type;
+        const sameEquipment = shipEquipmentConfig.find(e => e.type === itemType);
+        // y = -200, x = 100, size 3x3
+        if (dragY > sameEquipment.location[1] && dragY < sameEquipment.location[1] + sameEquipment.size[1]*this.cellHeight && 
+          dragX > sameEquipment.location[0] && dragX < sameEquipment.location[0] + sameEquipment.size[0]*this.cellWidth 
+        ) {
+          console.log('hovered equipmnet (engine)')
+        }
+      }
     });
 
     this.scene.input.on('dragend', (_, gameObject) => {
@@ -497,11 +541,6 @@ export class ShipInventory {
       if (item) {
         const gridX = Math.floor((gameObject.x + item.xyDeviations.x) / this.cellWidth);
         const gridY = Math.floor((gameObject.y + item.xyDeviations.y) / this.cellHeight);
-
-        // means it's the Equipment screen
-        if (gridY < 0) {
-
-        }
 
         if (this.isValidPlacement(item.item, gridX, gridY, item.gridPosition)) {
           const [oldX, oldY] = item.gridPosition;
