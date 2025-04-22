@@ -4,15 +4,22 @@ const state = {
   dropping: 'dropping',
 }
 
+const type = {
+  lightWeapon: 'Light Weapon',
+  heavyWeapon: 'Heavy Weapon',
+  engine: 'Engine',
+  scanner: 'Scanner',
+  shield: 'Shield',
+}
+
 // TODO: figure out the interface ot force using same size on grid item (e.g. engine is 3x3, so no engine can be bigger, probably)
 const shipEquipmentConfig = [
   {
-    type: 'Weapon 1',
+    type: type.lightWeapon,
     location: [625, -325],
     size: [4, 1],
     current: {
       id: 'ion_cannon_000',
-      type: 'Weapon',
       weight: 10,
       description: 'Ion Cannon. Most standard weapon',
       fireRate: 1,
@@ -22,18 +29,17 @@ const shipEquipmentConfig = [
     }
   },
   {
-    type: 'Weapon 2',
+    type: type.lightWeapon,
     location: [700, -125],
     size: [3, 1],
     current: null,
   },
   {
-    type: 'Engine',
+    type: type.engine,
     location: [125, -225],
     size: [3, 3],
     current: {
       id: 'thruster_000',
-      type: 'Engine',
       weight: 10,
       description: 'Thruster. Standard',
       speed: 5,
@@ -56,44 +62,39 @@ export class ShipInventory {
     x: 0,
     y: 0
   };
-  itemSprites = [];
+  inventoryItems = [];
+  equipmentSlots = [];
   container;
 
   items = [{
     name: 'Ion Cannon',
-    properties: {
-      id: 'ion_cannon_001',
-      type: 'Weapon',
-      weight: 10,
-      size: [1, 3],
-      description: 'Description of Item 1',
-      fireRate: 1,
-      damage: 10,
-      range: 100,
-      speed: 5,
-    }
+    id: 'ion_cannon_001',
+    type: type.lightWeapon,
+    weight: 10,
+    size: [1, 3],
+    description: 'Description of Item 1',
+    fireRate: 1,
+    damage: 10,
+    range: 100,
+    speed: 5,
   }, {
     name: 'Thruster',
-    properties: {
-      id: 'thruster_001',
-      type: 'Engine',
-      weight: 10,
-      size: [3, 3],
-      description: 'Description of Item 2',
-      speed: 5,
-      fuelConsumption: 1,
-      thrust: 10,
-    }
+    id: 'thruster_001',
+    type: type.engine,
+    weight: 10,
+    size: [3, 3],
+    description: 'Description of Item 2',
+    speed: 5,
+    fuelConsumption: 1,
+    thrust: 10,
   }, {
     name: 'Molecule Scanner',
-    properties: {
-      id: 'scanner_001',
-      type: 'Scanner',
-      weight: 2,
-      size: [2, 1],
-      description: 'Description of Molecule Scanner',
-      power: 2,
-    }
+    id: 'scanner_001',
+    type: type.scanner,
+    weight: 2,
+    size: [2, 1],
+    description: 'Description of Molecule Scanner',
+    power: 2,
   }];
 
   /** @param {Phaser.Scene} scene - parent scene */
@@ -152,6 +153,7 @@ export class ShipInventory {
       });
 
       this.equipmentContainer.add(itemGroup);
+      this.equipmentSlots.push(shipEquipmentConfig[i]);
     }
 
     this.container.add(this.equipmentContainer);
@@ -179,12 +181,12 @@ export class ShipInventory {
   }
 
   placeItemsInGrid() {
-    this.itemSprites = [];
+    this.inventoryItems = [];
 
     // Place items in the grid
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i];
-      const [width, height] = item.properties.size;
+      const [width, height] = item.size;
 
       // Find a free space in the grid
       const startingPosition = this.findFreeGridSpace(width, height);
@@ -260,14 +262,14 @@ export class ShipInventory {
 
         // Add to inventory container
         this.inventoryContainer.add(itemGroup);
-        this.itemSprites.push({
+        this.inventoryItems.push({
           item,
           state: state.idle,
           graphics: itemGraphics,
           text,
           container: itemGroup,
           gridPosition: startingPosition,
-          xyDeviations: { x: gridX*this.cellWidth, y: gridY*this.cellHeight },
+          xyDeviations: { x: gridX * this.cellWidth, y: gridY * this.cellHeight },
         });
       }
     }
@@ -350,20 +352,20 @@ export class ShipInventory {
   //   console.log('showItemPreview')
   //   this.previewTitle.setText(item.name);
 
-  //   let details = `Type: ${item.properties.type}\n`;
-  //   details += `Size: ${item.properties.size[0]}x${item.properties.size[1]}\n`;
-  //   details += `Weight: ${item.properties.weight}\n\n`;
-  //   details += item.properties.description + '\n\n';
+  //   let details = `Type: ${item.type}\n`;
+  //   details += `Size: ${item.size[0]}x${item.size[1]}\n`;
+  //   details += `Weight: ${item.weight}\n\n`;
+  //   details += item.description + '\n\n';
 
   //   // Type-specific properties
-  //   if (item.properties.type === 'Weapon') {
-  //     details += `Damage: ${item.properties.damage}\n`;
-  //     details += `Fire Rate: ${item.properties.fireRate}\n`;
-  //     details += `Range: ${item.properties.range}\n`;
-  //   } else if (item.properties.type === 'Engine') {
-  //     details += `Thrust: ${item.properties.thrust}\n`;
-  //     details += `Speed: ${item.properties.speed}\n`;
-  //     details += `Fuel Consumption: ${item.properties.fuelConsumption}\n`;
+  //   if (item.type === 'Weapon') {
+  //     details += `Damage: ${item.damage}\n`;
+  //     details += `Fire Rate: ${item.fireRate}\n`;
+  //     details += `Range: ${item.range}\n`;
+  //   } else if (item.type === 'Engine') {
+  //     details += `Thrust: ${item.thrust}\n`;
+  //     details += `Speed: ${item.speed}\n`;
+  //     details += `Fuel Consumption: ${item.fuelConsumption}\n`;
   //   }
 
   //   this.previewDetails.setText(details);
@@ -400,21 +402,21 @@ export class ShipInventory {
     });
 
     // Build details text
-    let details = `Type: ${item.properties.type}\n`;
-    details += `Size: ${item.properties.size[0]}x${item.properties.size[1]}\n`;
-    details += `Weight: ${item.properties.weight}\n\n`;
-    details += item.properties.description + '\n\n';
+    let details = `Type: ${item.type}\n`;
+    details += `Size: ${item.size[0]}x${item.size[1]}\n`;
+    details += `Weight: ${item.weight}\n\n`;
+    details += item.description + '\n\n';
 
     // Add type-specific properties
-    if (item.properties.type === 'Weapon') {
-      details += `Damage: ${item.properties.damage}\n`;
-      details += `Fire Rate: ${item.properties.fireRate}\n`;
-      details += `Range: ${item.properties.range}\n`;
-      details += `Speed: ${item.properties.speed}\n`;
-    } else if (item.properties.type === 'Engine') {
-      details += `Thrust: ${item.properties.thrust}\n`;
-      details += `Speed: ${item.properties.speed}\n`;
-      details += `Fuel Consumption: ${item.properties.fuelConsumption}\n`;
+    if (item.type === 'Weapon') {
+      details += `Damage: ${item.damage}\n`;
+      details += `Fire Rate: ${item.fireRate}\n`;
+      details += `Range: ${item.range}\n`;
+      details += `Speed: ${item.speed}\n`;
+    } else if (item.type === 'Engine') {
+      details += `Thrust: ${item.thrust}\n`;
+      details += `Speed: ${item.speed}\n`;
+      details += `Fuel Consumption: ${item.fuelConsumption}\n`;
     }
 
     // Create details text
@@ -524,11 +526,12 @@ export class ShipInventory {
       // means it's in the Equipment screen
       // TODO: fixme
       if (dragY < 0) {
-        const itemType = gameObject.type;
-        const sameEquipment = shipEquipmentConfig.find(e => e.type === itemType);
+        const item = this.inventoryItems.find(sprite => sprite.container === gameObject).item;
+        const sameEquipment = this.equipmentSlots.find(s => s.type === item.type);
+        debugger;
         // y = -200, x = 100, size 3x3
-        if (dragY > sameEquipment.location[1] && dragY < sameEquipment.location[1] + sameEquipment.size[1]*this.cellHeight && 
-          dragX > sameEquipment.location[0] && dragX < sameEquipment.location[0] + sameEquipment.size[0]*this.cellWidth 
+        if (dragY > sameEquipment.location[1] && dragY < sameEquipment.location[1] + sameEquipment.size[1] * this.cellHeight &&
+          dragX > sameEquipment.location[0] && dragX < sameEquipment.location[0] + sameEquipment.size[0] * this.cellWidth
         ) {
           console.log('hovered equipmnet (engine)')
         }
@@ -536,7 +539,7 @@ export class ShipInventory {
     });
 
     this.scene.input.on('dragend', (_, gameObject) => {
-      const item = this.itemSprites.find(sprite => sprite.container === gameObject);
+      const item = this.inventoryItems.find(sprite => sprite.container === gameObject);
 
       if (item) {
         const gridX = Math.floor((gameObject.x + item.xyDeviations.x) / this.cellWidth);
@@ -544,7 +547,7 @@ export class ShipInventory {
 
         if (this.isValidPlacement(item.item, gridX, gridY, item.gridPosition)) {
           const [oldX, oldY] = item.gridPosition;
-          const [width, height] = item.item.properties.size;
+          const [width, height] = item.item.size;
 
           for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
@@ -580,7 +583,7 @@ export class ShipInventory {
   */
 
   isValidPlacement(item, gridX, gridY, currentPos) {
-    const [width, height] = item.properties.size;
+    const [width, height] = item.size;
     const [currentX, currentY] = currentPos;
 
     // Check bounds
