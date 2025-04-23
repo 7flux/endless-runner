@@ -15,9 +15,11 @@ const type = {
 // TODO: figure out the interface ot force using same size on grid item (e.g. engine is 3x3, so no engine can be bigger, probably)
 const shipEquipmentConfig = [
   {
+    id: 'lightWeapon_0',
     type: type.lightWeapon,
     location: [625, -325],
     size: [4, 1],
+    // TODO: should be a ref to existing item
     current: {
       id: 'ion_cannon_000',
       weight: 10,
@@ -29,12 +31,14 @@ const shipEquipmentConfig = [
     }
   },
   {
+    id: 'lightWeapon_1',
     type: type.lightWeapon,
     location: [700, -125],
     size: [3, 1],
     current: null,
   },
   {
+    id: 'engine_0',
     type: type.engine,
     location: [125, -225],
     size: [3, 3],
@@ -137,8 +141,7 @@ export class ShipInventory {
 
       const itemGroup = this.scene.add.container(0, 0);
       itemGroup.add([itemGraphics]);
-      // Make item interactive
-      itemGroup.setInteractive(new Phaser.Geom.Rectangle(x, y, width, height), Phaser.Geom.Rectangle.Contains);
+      itemGroup.setInteractive(new Phaser.Geom.Rectangle(x, y, width, height), Phaser.Geom.Rectangle.Contains, true);
       itemGroup.on('pointerover', (e) => {
         this.scene.input.setDefaultCursor('pointer');
         itemGraphics.clear();
@@ -151,9 +154,8 @@ export class ShipInventory {
         itemGraphics.fillStyle(0x00aaaa, 0.3);
         itemGraphics.fillRect(x, y, width, height);
       });
-
       this.equipmentContainer.add(itemGroup);
-      this.equipmentSlots.push(shipEquipmentConfig[i]);
+      this.equipmentSlots.push({ slot: shipEquipmentConfig[i], container: itemGroup });
     }
 
     this.container.add(this.equipmentContainer);
@@ -522,21 +524,34 @@ export class ShipInventory {
       this.cleanUpTooltip();
       gameObject.x = dragX;
       gameObject.y = dragY;
-
-      // means it's in the Equipment screen
-      // TODO: fixme
-      if (dragY < 0) {
-        const item = this.inventoryItems.find(sprite => sprite.container === gameObject).item;
-        const sameEquipment = this.equipmentSlots.find(s => s.type === item.type);
-        debugger;
-        // y = -200, x = 100, size 3x3
-        if (dragY > sameEquipment.location[1] && dragY < sameEquipment.location[1] + sameEquipment.size[1] * this.cellHeight &&
-          dragX > sameEquipment.location[0] && dragX < sameEquipment.location[0] + sameEquipment.size[0] * this.cellWidth
-        ) {
-          console.log('hovered equipmnet (engine)')
-        }
-      }
     });
+
+    this.scene.input.on('dragenter', (pointer, gameObject, dropZone) => {
+      const item = this.inventoryItems.find(sprite => sprite.container === gameObject).item;
+      const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
+      // TODO: code smell
+      const itemGraphics = slotInfo.container.list[0];
+
+      if (slotInfo.slot.type === item.type) {
+        itemGraphics.clear();
+        itemGraphics.fillStyle(0x33aaaa, 0.5);
+        itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
+      } else {
+        itemGraphics.clear();
+        itemGraphics.fillStyle(0xaa0000, 0.5);
+        itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
+      }
+    })
+
+    this.scene.input.on('dragleave', (pointer, gameObject, dropZone) => {
+      const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
+      // TODO: code smell
+      const itemGraphics = slotInfo.container.list[0];
+
+      itemGraphics.clear();
+      itemGraphics.fillStyle(0x00aaaa, 0.3); // manage standard graphics
+      itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
+    })
 
     this.scene.input.on('dragend', (_, gameObject) => {
       const item = this.inventoryItems.find(sprite => sprite.container === gameObject);
