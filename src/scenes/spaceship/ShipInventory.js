@@ -553,6 +553,39 @@ export class ShipInventory {
       itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
     })
 
+    this.scene.input.on('drop', (event, gameObject, dropZone) => {
+      const item = this.inventoryItems.find(sprite => sprite.container === gameObject).item;
+      const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
+      // TODO: code smell
+      // const itemGraphics = slotInfo.container.list[0];
+      console.log('drop', slotInfo)
+      console.log('slotInfo.slot.type === item.type', slotInfo.slot.type === item.type)
+
+      if (slotInfo.slot.type === item.type) {
+        // TODO: move item to an equipment location. remove from the grid
+        // const [oldX, oldY] = item.gridPosition;
+        // const [width, height] = item.item.size;
+        
+        // const gridX = Math.floor((gameObject.x + item.xyDeviations.x) / this.cellWidth);
+        // const gridY = Math.floor((gameObject.y + item.xyDeviations.y) / this.cellHeight);
+        // for (let y = 0; y < height; y++) {
+        //   for (let x = 0; x < width; x++) {
+        //     // remove from grid
+        //     this.grid[oldY + y][oldX + x] = null;
+        //     // add
+        //     this.grid[gridY + y][gridX + x] = { item: item.item, gridX, gridY, width, height };
+        //   }
+        // }
+        
+        const [x,y] = slotInfo.slot.location;
+        gameObject.x = x;
+        gameObject.y = y;
+
+        // event.event.stopPropagation();
+        // event.event.stopImmediatePropagation();
+      }
+    })
+
     this.scene.input.on('dragend', (_, gameObject) => {
       const item = this.inventoryItems.find(sprite => sprite.container === gameObject);
 
