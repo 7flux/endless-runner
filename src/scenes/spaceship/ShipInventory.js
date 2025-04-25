@@ -577,12 +577,26 @@ export class ShipInventory {
         //   }
         // }
         
-        const [x,y] = slotInfo.slot.location;
-        gameObject.x = x;
-        gameObject.y = y;
 
-        // event.event.stopPropagation();
-        // event.event.stopImmediatePropagation();
+        // FIXME
+        // const [slotX, slotY] = slotInfo.slot.location;
+        // gameObject.x = slotX;
+        // gameObject.y = slotY;
+
+        // // Update the slot's current item
+        // slotInfo.slot.current = item;
+
+        // // Remove the item from the inventory grid
+        // const [oldX, oldY] = item.gridPosition;
+        // const [width, height] = item.size;
+        // for (let y = 0; y < height; y++) {
+        //   for (let x = 0; x < width; x++) {
+        //     this.grid[oldY + y][oldX + x] = null;
+        //   }
+        // }
+
+        // // Remove the item from the inventory container
+        // this.inventoryContainer.remove(gameObject);
       }
     })
 
