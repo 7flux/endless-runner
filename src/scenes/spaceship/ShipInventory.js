@@ -554,7 +554,7 @@ export class ShipInventory {
     })
 
     this.scene.input.on('drop', (event, gameObject, dropZone) => {
-      const item = this.inventoryItems.find(sprite => sprite.container === gameObject).item;
+      const { item, xyDeviations } = this.inventoryItems.find(sprite => sprite.container === gameObject);
       const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
       // TODO: code smell
       // const itemGraphics = slotInfo.container.list[0];
@@ -562,41 +562,25 @@ export class ShipInventory {
       console.log('slotInfo.slot.type === item.type', slotInfo.slot.type === item.type)
 
       if (slotInfo.slot.type === item.type) {
-        // TODO: move item to an equipment location. remove from the grid
-        // const [oldX, oldY] = item.gridPosition;
-        // const [width, height] = item.item.size;
-        
-        // const gridX = Math.floor((gameObject.x + item.xyDeviations.x) / this.cellWidth);
-        // const gridY = Math.floor((gameObject.y + item.xyDeviations.y) / this.cellHeight);
-        // for (let y = 0; y < height; y++) {
-        //   for (let x = 0; x < width; x++) {
-        //     // remove from grid
-        //     this.grid[oldY + y][oldX + x] = null;
-        //     // add
-        //     this.grid[gridY + y][gridX + x] = { item: item.item, gridX, gridY, width, height };
-        //   }
-        // }
-        
-
         // FIXME
-        // const [slotX, slotY] = slotInfo.slot.location;
-        // gameObject.x = slotX;
-        // gameObject.y = slotY;
+        const [slotX, slotY] = slotInfo.slot.location;
+        
+        // Update the slot's current item
+        slotInfo.slot.current = item;
+        this.equipmentContainer.add(gameObject);
+        gameObject.x = slotX - xyDeviations.x;
+        gameObject.y = slotY - xyDeviations.y;
 
-        // // Update the slot's current item
-        // slotInfo.slot.current = item;
+        // Remove the item from the inventory grid
+        for (let y = 0; y < this.totalCellRows; y++) {
+          for (let x = 0; x < this.cellsInRow; x++) {
+            if (this.grid[y][x]?.item.id === item.id) this.grid[y][x].item = null;
+          }
+        }
 
-        // // Remove the item from the inventory grid
-        // const [oldX, oldY] = item.gridPosition;
-        // const [width, height] = item.size;
-        // for (let y = 0; y < height; y++) {
-        //   for (let x = 0; x < width; x++) {
-        //     this.grid[oldY + y][oldX + x] = null;
-        //   }
-        // }
-
-        // // Remove the item from the inventory container
-        // this.inventoryContainer.remove(gameObject);
+        // Remove item from the inventory
+        this.inventoryContainer.remove(gameObject);
+        this.inventoryItems = this.inventoryItems.filter(sprite => sprite.container !== gameObject);
       }
     })
 
