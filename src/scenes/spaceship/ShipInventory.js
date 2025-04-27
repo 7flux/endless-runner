@@ -527,8 +527,14 @@ export class ShipInventory {
     });
 
     this.scene.input.on('dragenter', (pointer, gameObject, dropZone) => {
-      const item = this.inventoryItems.find(sprite => sprite.container === gameObject).item;
       const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
+      let item;
+      if (slotInfo.slot.current && slotInfo.inventoryItemObject === gameObject) {
+        item = slotInfo.slot.current;
+      } else {
+        item = this.inventoryItems.find(sprite => sprite.container === gameObject).item;
+      }
+
       // TODO: code smell
       const itemGraphics = slotInfo.container.list[0];
 
@@ -557,16 +563,13 @@ export class ShipInventory {
       const { item, xyDeviations } = this.inventoryItems.find(sprite => sprite.container === gameObject);
       const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
       // TODO: code smell
-      // const itemGraphics = slotInfo.container.list[0];
-      console.log('drop', slotInfo)
-      console.log('slotInfo.slot.type === item.type', slotInfo.slot.type === item.type)
-
       if (slotInfo.slot.type === item.type) {
         // FIXME
         const [slotX, slotY] = slotInfo.slot.location;
         
         // Update the slot's current item
         slotInfo.slot.current = item;
+        slotInfo.inventoryItemObject = gameObject;
         this.equipmentContainer.add(gameObject);
         gameObject.x = slotX - xyDeviations.x;
         gameObject.y = slotY - xyDeviations.y;
