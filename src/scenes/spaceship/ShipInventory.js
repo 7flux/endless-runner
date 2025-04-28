@@ -519,6 +519,33 @@ export class ShipInventory {
   }
 
   setupDragAndDrop() {
+    this.scene.input.on('dragstart', (event, gameObject, dropZone) => {
+      // const { item, xyDeviations } = this.inventoryItems.find(sprite => sprite.container === gameObject);
+      // const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
+      // // TODO: code smell
+      // if (slotInfo.slot.type === item.type) {
+      //   // FIXME
+      //   const [slotX, slotY] = slotInfo.slot.location;
+        
+      //   // Update the slot's current item
+      //   slotInfo.slot.current = item;
+      //   slotInfo.inventoryItemObject = gameObject;
+      //   this.equipmentContainer.add(gameObject);
+      //   gameObject.x = slotX - xyDeviations.x;
+      //   gameObject.y = slotY - xyDeviations.y;
+
+      //   // Remove the item from the inventory grid
+      //   for (let y = 0; y < this.totalCellRows; y++) {
+      //     for (let x = 0; x < this.cellsInRow; x++) {
+      //       if (this.grid[y][x]?.item.id === item.id) this.grid[y][x].item = null;
+      //     }
+      //   }
+
+      //   // Remove item from the inventory
+      //   this.inventoryContainer.remove(gameObject);
+      //   this.inventoryItems = this.inventoryItems.filter(sprite => sprite.container !== gameObject);
+      // }
+    })
     // TODO: game object will have it's own coordinates deviation based on initial location (if real x = 60px, it will think during any events, that x is actully 0px, since it's it's starting position)
     this.scene.input.on('drag', (_, gameObject, dragX, dragY) => {
       this.cleanUpTooltip();
@@ -529,7 +556,7 @@ export class ShipInventory {
     this.scene.input.on('dragenter', (pointer, gameObject, dropZone) => {
       const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
       let item;
-      if (slotInfo.slot.current && slotInfo.inventoryItemObject === gameObject) {
+      if (slotInfo.slot.current && slotInfo.inventoryItemObject?.gameObject === gameObject) {
         item = slotInfo.slot.current;
       } else {
         item = this.inventoryItems.find(sprite => sprite.container === gameObject).item;
@@ -560,7 +587,7 @@ export class ShipInventory {
     })
 
     this.scene.input.on('drop', (event, gameObject, dropZone) => {
-      const { item, xyDeviations } = this.inventoryItems.find(sprite => sprite.container === gameObject);
+      const { item, xyDeviations, ...itemProps } = this.inventoryItems.find(sprite => sprite.container === gameObject);
       const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
       // TODO: code smell
       if (slotInfo.slot.type === item.type) {
@@ -569,7 +596,7 @@ export class ShipInventory {
         
         // Update the slot's current item
         slotInfo.slot.current = item;
-        slotInfo.inventoryItemObject = gameObject;
+        slotInfo.inventoryItemObject = { item, xyDeviations, ...itemProps, gameObject };
         this.equipmentContainer.add(gameObject);
         gameObject.x = slotX - xyDeviations.x;
         gameObject.y = slotY - xyDeviations.y;
@@ -615,6 +642,12 @@ export class ShipInventory {
           gameObject.x = item.gridPosition[0] * this.cellWidth - item.xyDeviations.x;
           gameObject.y = item.gridPosition[1] * this.cellHeight - item.xyDeviations.y;
         }
+      } else {
+        // it's an equipment item
+        const slotItem = this.equipmentSlots.find(s => s.inventoryItemObject && s.inventoryItemObject.gameObject === gameObject);
+        if (!slotItem) return;
+        slotItem.inventoryItemObject.gameObject.x = slotItem.slot.location[0] - slotItem.inventoryItemObject.xyDeviations.x;
+        slotItem.inventoryItemObject.gameObject.y = slotItem.slot.location[1] - slotItem.inventoryItemObject.xyDeviations.y;
       }
     });
   }
