@@ -12,6 +12,16 @@ const type = {
   shield: 'Shield',
 }
 
+const itemColors = {
+  equipmentDefault: 0x00aaaa,
+  equipmentHovered: 0x3333ff,
+  inventoryDefault: 0x0000ff,
+  inventoryHovered: 0x3333ff,
+  inventorySelected: 0x00ff00,
+  equipmentApplicable: 0x33aaaa, // inventory item can be placed
+  invalid: 0xaa0000,
+}
+
 // TODO: figure out the interface ot force using same size on grid item (e.g. engine is 3x3, so no engine can be bigger, probably)
 const shipEquipmentConfig = [
   {
@@ -68,6 +78,7 @@ export class ShipInventory {
   };
   inventoryItems = [];
   equipmentSlots = [];
+  draggedItem = null; // holds item information, and state ['inventoryItem', 'equipmentItem']
   container;
 
   items = [{
@@ -136,7 +147,7 @@ export class ShipInventory {
 
       const [x, y, width, height] = [...shipEquipmentConfig[i].location, shipEquipmentConfig[i].size[0] * this.cellWidth, shipEquipmentConfig[i].size[1] * this.cellHeight];
 
-      itemGraphics.fillStyle(0x00aaaa, 0.3);
+      itemGraphics.fillStyle(itemColors.equipmentDefault, 0.3);
       itemGraphics.fillRect(x, y, width, height);
 
       const itemGroup = this.scene.add.container(0, 0);
@@ -145,13 +156,13 @@ export class ShipInventory {
       itemGroup.on('pointerover', (e) => {
         this.scene.input.setDefaultCursor('pointer');
         itemGraphics.clear();
-        itemGraphics.fillStyle(0x3333ff, 0.7);
+        itemGraphics.fillStyle(itemColors.equipmentHovered, 0.7);
         itemGraphics.fillRect(x, y, width, height);
       });
       itemGroup.on('pointerout', () => {
         this.scene.input.setDefaultCursor('default');
         itemGraphics.clear();
-        itemGraphics.fillStyle(0x00aaaa, 0.3);
+        itemGraphics.fillStyle(itemColors.equipmentDefault, 0.3);
         itemGraphics.fillRect(x, y, width, height);
       });
       this.equipmentContainer.add(itemGroup);
@@ -198,7 +209,7 @@ export class ShipInventory {
 
         // Create item visual
         const itemGraphics = this.scene.add.graphics();
-        itemGraphics.fillStyle(0x0000ff, 0.5);
+        itemGraphics.fillStyle(itemColors.inventoryDefault, 0.5);
         itemGraphics.fillRect(
           gridX * this.cellWidth,
           gridY * this.cellHeight,
@@ -231,14 +242,14 @@ export class ShipInventory {
           gridY * this.cellHeight,
           width * this.cellWidth,
           height * this.cellHeight
-        ), Phaser.Geom.Rectangle.Contains);
+        ), Phaser.Geom.Rectangle.Contains/* TODO */);
 
         // TODO: make it a separate function
         // Hover effects
         itemGroup.on('pointerover', (e) => {
           this.scene.input.setDefaultCursor('pointer');
           itemGraphics.clear();
-          itemGraphics.fillStyle(0x3333ff, 0.7);
+          itemGraphics.fillStyle(itemColors.inventoryHovered, 0.7);
           itemGraphics.fillRect(
             gridX * this.cellWidth,
             gridY * this.cellHeight,
@@ -252,7 +263,7 @@ export class ShipInventory {
         itemGroup.on('pointerout', () => {
           this.scene.input.setDefaultCursor('default');
           itemGraphics.clear();
-          itemGraphics.fillStyle(0x0000ff, 0.5);
+          itemGraphics.fillStyle(itemColors.inventoryDefault, 0.5);
           itemGraphics.fillRect(
             gridX * this.cellWidth,
             gridY * this.cellHeight,
@@ -519,33 +530,25 @@ export class ShipInventory {
   }
 
   setupDragAndDrop() {
-    this.scene.input.on('dragstart', (event, gameObject, dropZone) => {
-      // const { item, xyDeviations } = this.inventoryItems.find(sprite => sprite.container === gameObject);
-      // const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
-      // // TODO: code smell
-      // if (slotInfo.slot.type === item.type) {
-      //   // FIXME
-      //   const [slotX, slotY] = slotInfo.slot.location;
-        
-      //   // Update the slot's current item
-      //   slotInfo.slot.current = item;
-      //   slotInfo.inventoryItemObject = gameObject;
-      //   this.equipmentContainer.add(gameObject);
-      //   gameObject.x = slotX - xyDeviations.x;
-      //   gameObject.y = slotY - xyDeviations.y;
+    // should clean up on dragend
+    this.scene.input.on('dragstart', (_, gameObject, dragX, dragY) => {
+      let item = this.inventoryItems.find(sprite => sprite.container === gameObject);
 
-      //   // Remove the item from the inventory grid
-      //   for (let y = 0; y < this.totalCellRows; y++) {
-      //     for (let x = 0; x < this.cellsInRow; x++) {
-      //       if (this.grid[y][x]?.item.id === item.id) this.grid[y][x].item = null;
-      //     }
-      //   }
+      if (item) {
+        this.draggedItem = {
+          state: 'inventoryItem',
+          item: item,
+        };
+      } else {
+        item = this.equipmentSlots.find(s => s.inventoryItemObject && s.inventoryItemObject.gameObject === gameObject);
+        this.draggedItem = {
+          state: 'equipmentItem',
+          ...item.inventoryItemObject,
+          slot: item.slot,
+        }
+      }
+    });
 
-      //   // Remove item from the inventory
-      //   this.inventoryContainer.remove(gameObject);
-      //   this.inventoryItems = this.inventoryItems.filter(sprite => sprite.container !== gameObject);
-      // }
-    })
     // TODO: game object will have it's own coordinates deviation based on initial location (if real x = 60px, it will think during any events, that x is actully 0px, since it's it's starting position)
     this.scene.input.on('drag', (_, gameObject, dragX, dragY) => {
       this.cleanUpTooltip();
@@ -553,25 +556,20 @@ export class ShipInventory {
       gameObject.y = dragY;
     });
 
-    this.scene.input.on('dragenter', (pointer, gameObject, dropZone) => {
+    // dragenter - to indicate if a dropzone is valid for an item (changes color)
+    this.scene.input.on('dragenter', (_, gameObject, dropZone) => {
       const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
-      let item;
-      if (slotInfo.slot.current && slotInfo.inventoryItemObject?.gameObject === gameObject) {
-        item = slotInfo.slot.current;
-      } else {
-        item = this.inventoryItems.find(sprite => sprite.container === gameObject).item;
-      }
 
       // TODO: code smell
       const itemGraphics = slotInfo.container.list[0];
 
-      if (slotInfo.slot.type === item.type) {
+      if (slotInfo.slot.type === this.draggedItem.item.type) {
         itemGraphics.clear();
-        itemGraphics.fillStyle(0x33aaaa, 0.5);
+        itemGraphics.fillStyle(itemColors.equipmentApplicable, 0.5);
         itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
       } else {
         itemGraphics.clear();
-        itemGraphics.fillStyle(0xaa0000, 0.5);
+        itemGraphics.fillStyle(itemColors.invalid, 0.5);
         itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
       }
     })
@@ -582,7 +580,7 @@ export class ShipInventory {
       const itemGraphics = slotInfo.container.list[0];
 
       itemGraphics.clear();
-      itemGraphics.fillStyle(0x00aaaa, 0.3); // manage standard graphics
+      itemGraphics.fillStyle(itemColors.equipmentDefault, 0.3);
       itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
     })
 
@@ -649,6 +647,8 @@ export class ShipInventory {
         slotItem.inventoryItemObject.gameObject.x = slotItem.slot.location[0] - slotItem.inventoryItemObject.xyDeviations.x;
         slotItem.inventoryItemObject.gameObject.y = slotItem.slot.location[1] - slotItem.inventoryItemObject.xyDeviations.y;
       }
+
+      this.draggedItem = null;
     });
   }
 
@@ -663,6 +663,25 @@ export class ShipInventory {
       2.1. check if it's in the grid area
       2.2. check if it doesn't overlap other items
   */
+
+  checkDropZone(dropZone) {
+    const slot = this.equipmentSlots.find(s => s.container === dropZone);
+    const inventory = this.inventoryItems.find(sprite => sprite.container === dropZone);
+    
+    if (slot) {
+      // Check if the item can be placed in the drop zone
+      const item = this.inventoryItems.find(sprite => sprite.container === dropZone);
+      if (item && slot.slot.type === item.item.type) {
+        return true;
+      }
+  
+      return false;
+    } else {
+      const item = this.inventoryItems.find(sprite => sprite.container === dropZone);
+      console.log('item', item);
+    }
+
+  }
 
   isValidPlacement(item, gridX, gridY, currentPos) {
     const [width, height] = item.size;
