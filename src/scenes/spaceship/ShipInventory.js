@@ -536,14 +536,14 @@ export class ShipInventory {
 
       if (item) {
         this.draggedItem = {
+          ...item,
           state: 'inventoryItem',
-          item: item,
         };
       } else {
         item = this.equipmentSlots.find(s => s.inventoryItemObject && s.inventoryItemObject.gameObject === gameObject);
         this.draggedItem = {
-          state: 'equipmentItem',
           ...item.inventoryItemObject,
+          state: 'equipmentItem',
           slot: item.slot,
         }
       }
