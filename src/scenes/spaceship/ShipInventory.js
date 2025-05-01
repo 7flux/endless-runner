@@ -115,7 +115,10 @@ export class ShipInventory {
   /** @param {Phaser.Scene} scene - parent scene */
   constructor(scene, x, y) {
     this.scene = scene;
-    this.container = this.scene.add.container(x, y);
+    this.container = this.scene.add.container(0, 0);
+    // Create inventory container for items
+    this.inventoryContainer = this.scene.add.container(x, y);
+    this.container.add(this.inventoryContainer);
     this.containerOrigin.x = x;
     this.containerOrigin.y = y;
 
@@ -125,9 +128,8 @@ export class ShipInventory {
     // Create equipment container
     this.createEquipmentContainer();
 
-    // Create inventory container for items
-    this.inventoryContainer = this.scene.add.container(0, 0);
-    this.container.add(this.inventoryContainer);
+    // this.inventoryContainer = this.scene.add.container(0, 0);
+
 
     // Place items in the grid
     this.placeItemsInGrid();
@@ -183,14 +185,14 @@ export class ShipInventory {
 
     // Create a tiled sprite using the cell texture
     this.gridSprite = this.scene.add.tileSprite(
-      0, 0, // Position relative to container
+      0, 0, // Position relative to inventoryContainer
       this.cellsInRow * this.cellWidth, this.totalCellRows * this.cellHeight,
       'gridCellTexture'
     );
     this.gridSprite.setOrigin(0, 0);
 
-    // Add the sprite to the container
-    this.container.add(this.gridSprite);
+    // Add the sprite to the inventoryContainer
+    this.inventoryContainer.add(this.gridSprite);
   }
 
   placeItemsInGrid() {
@@ -224,7 +226,6 @@ export class ShipInventory {
           }
         }
 
-        // Add text label - correct creation through scene
         const text = this.scene.add.text(
           gridX * this.cellWidth + 5,
           gridY * this.cellHeight + 5,
@@ -232,17 +233,15 @@ export class ShipInventory {
           { fontSize: '12px', fill: '#fff', wordWrap: { width: width * this.cellWidth - 10 } }
         );
 
-        // Group item graphics and text
         const itemGroup = this.scene.add.container(0, 0);
         itemGroup.add([itemGraphics, text]);
 
-        // Make item interactive
         itemGroup.setInteractive(new Phaser.Geom.Rectangle(
           gridX * this.cellWidth,
           gridY * this.cellHeight,
           width * this.cellWidth,
           height * this.cellHeight
-        ), Phaser.Geom.Rectangle.Contains/* TODO */);
+        ), Phaser.Geom.Rectangle.Contains);
 
         // TODO: make it a separate function
         // Hover effects
@@ -346,19 +345,19 @@ export class ShipInventory {
   // }
 
   createPreviewPanel() {
-    console.log('createPreviewPanel')
-    this.previewPanel = this.scene.add.container(this.cellsInRow * this.cellWidth + 2, 0);
-    this.container.add(this.previewPanel);
+    // console.log('createPreviewPanel')
+    // this.previewPanel = this.scene.add.container(this.cellsInRow * this.cellWidth + 2, 0);
+    // this.container.add(this.previewPanel);
 
-    const bg = this.scene.add.graphics();
-    bg.fillStyle(0x222222, 0.8);
-    bg.fillRect(0, 0, 200, 400);
-    this.previewPanel.add(bg);
+    // const bg = this.scene.add.graphics();
+    // bg.fillStyle(0x222222, 0.8);
+    // bg.fillRect(0, 0, 200, 400);
+    // this.previewPanel.add(bg);
 
-    this.previewTitle = this.scene.add.text(10, 10, 'Item Preview', { fontSize: '18px', fill: '#fff' });
-    this.previewDetails = this.scene.add.text(10, 40, '', { fontSize: '14px', fill: '#fff', wordWrap: { width: 180 } });
+    // this.previewTitle = this.scene.add.text(10, 10, 'Item Preview', { fontSize: '18px', fill: '#fff' });
+    // this.previewDetails = this.scene.add.text(10, 40, '', { fontSize: '14px', fill: '#fff', wordWrap: { width: 180 } });
 
-    this.previewPanel.add([this.previewTitle, this.previewDetails]);
+    // this.previewPanel.add([this.previewTitle, this.previewDetails]);
   }
 
   // showSpaceshipPreview(item) {
@@ -558,61 +557,79 @@ export class ShipInventory {
 
     // dragenter - to indicate if a dropzone is valid for an item (changes color)
     this.scene.input.on('dragenter', (_, gameObject, dropZone) => {
-      const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
-
       // TODO: code smell
-      const itemGraphics = slotInfo.container.list[0];
+      // const itemGraphics = slotInfo.container.list[0];
+      const itemGraphics = this.draggedItem.graphics;
+      itemGraphics.clear();
 
-      if (slotInfo.slot.type === this.draggedItem.item.type) {
-        itemGraphics.clear();
-        itemGraphics.fillStyle(itemColors.equipmentApplicable, 0.5);
-        itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
-      } else {
-        itemGraphics.clear();
-        itemGraphics.fillStyle(itemColors.invalid, 0.5);
-        itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
+      const equipmentSlot = this.equipmentSlots.find(s => s.container === dropZone);
+      if (equipmentSlot) {
+        if (this.draggedItem.item.type === equipmentSlot.slot.type) {
+          itemGraphics.fillStyle(itemColors.equipmentApplicable, 0.5);
+          itemGraphics.fillRect(...equipmentSlot.slot.location, equipmentSlot.slot.size[0] * this.cellWidth, equipmentSlot.slot.size[1] * this.cellHeight);
+        } else {
+          itemGraphics.fillStyle(itemColors.invalid, 0.5);
+          itemGraphics.fillRect(...equipmentSlot.slot.location, equipmentSlot.slot.size[0] * this.cellWidth, equipmentSlot.slot.size[1] * this.cellHeight);
+        }
+      } else if (false) { // TODO: handle droppable area of the inventory grid
+        const [width, height] = this.draggedItem.item.size;
+        const [gridX, gridY] = this.draggedItem.gridPosition;
+        itemGraphics.fillRect(
+          gridX * this.cellWidth,
+          gridY * this.cellHeight,
+          width * this.cellWidth,
+          height * this.cellHeight
+        );
       }
     })
 
-    this.scene.input.on('dragleave', (pointer, gameObject, dropZone) => {
-      const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
-      // TODO: code smell
-      const itemGraphics = slotInfo.container.list[0];
+    // this.scene.input.on('dragleave', (pointer, gameObject, dropZone) => {
+    //   const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
+    //   // TODO: code smell
+    //   const itemGraphics = slotInfo.container.list[0];
 
-      itemGraphics.clear();
-      itemGraphics.fillStyle(itemColors.equipmentDefault, 0.3);
-      itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
-    })
+    //   itemGraphics.clear();
+    //   itemGraphics.fillStyle(itemColors.equipmentDefault, 0.3);
+    //   itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
+    // })
 
     this.scene.input.on('drop', (event, gameObject, dropZone) => {
       const { item, xyDeviations, ...itemProps } = this.inventoryItems.find(sprite => sprite.container === gameObject);
+      console.log('drop');
       const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
-      // TODO: code smell
-      if (slotInfo.slot.type === item.type) {
-        // FIXME
-        const [slotX, slotY] = slotInfo.slot.location;
-        
-        // Update the slot's current item
-        slotInfo.slot.current = item;
-        slotInfo.inventoryItemObject = { item, xyDeviations, ...itemProps, gameObject };
-        this.equipmentContainer.add(gameObject);
-        gameObject.x = slotX - xyDeviations.x;
-        gameObject.y = slotY - xyDeviations.y;
-
-        // Remove the item from the inventory grid
-        for (let y = 0; y < this.totalCellRows; y++) {
-          for (let x = 0; x < this.cellsInRow; x++) {
-            if (this.grid[y][x]?.item.id === item.id) this.grid[y][x].item = null;
+      // dropping on the equipment slot
+      if (slotInfo) {
+        if (slotInfo.slot.type === item.type) {
+          // FIXME
+          const [slotX, slotY] = slotInfo.slot.location;
+          
+          // Update the slot's current item
+          slotInfo.slot.current = item;
+          slotInfo.inventoryItemObject = { item, xyDeviations, ...itemProps, gameObject };
+          this.equipmentContainer.add(gameObject);
+          gameObject.x = slotX - xyDeviations.x;
+          gameObject.y = slotY - xyDeviations.y;
+  
+          // Remove the item from the inventory grid
+          for (let y = 0; y < this.totalCellRows; y++) {
+            for (let x = 0; x < this.cellsInRow; x++) {
+              if (this.grid[y][x]?.item.id === item.id) this.grid[y][x].item = null;
+            }
           }
-        }
 
-        // Remove item from the inventory
-        this.inventoryContainer.remove(gameObject);
-        this.inventoryItems = this.inventoryItems.filter(sprite => sprite.container !== gameObject);
-      }
+          // Remove item from the inventory
+          this.inventoryContainer.remove(gameObject);
+          this.inventoryItems = this.inventoryItems.filter(sprite => sprite.container !== gameObject);
+        }
+        // dropping on the inventory grid
+        } else {
+          const check = this.inventoryItems.find(item => item.container === dropZone);
+          console.log('check', check);
+        }
     })
 
     this.scene.input.on('dragend', (_, gameObject) => {
+      console.log('dragend')
       const item = this.inventoryItems.find(sprite => sprite.container === gameObject);
 
       if (item) {
@@ -664,7 +681,7 @@ export class ShipInventory {
       2.2. check if it doesn't overlap other items
   */
 
-  checkDropZone(dropZone) {
+  getCurrentZone(dropZone) {
     const slot = this.equipmentSlots.find(s => s.container === dropZone);
     const inventory = this.inventoryItems.find(sprite => sprite.container === dropZone);
     
