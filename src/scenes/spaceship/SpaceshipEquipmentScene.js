@@ -14,7 +14,7 @@ export class SpaceshipEquipmentScene extends Phaser.Scene {
   }
 
   create() {
-    this.previewScene = new ShipPreview(this, 0, 0);
+    this.previewScene = new ShipPreview(this, 0, 0); // TODO: either move equipment code here or remove completely
     this.shipInventory = new ShipInventory(this, 0, this.scale.height / 2);
 
     // this.shipInventory.container.setVisible(false)

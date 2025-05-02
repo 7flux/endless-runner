@@ -27,7 +27,7 @@ const shipEquipmentConfig = [
   {
     id: 'lightWeapon_0',
     type: type.lightWeapon,
-    location: [625, -325],
+    location: [625, 50],
     size: [4, 1],
     // TODO: should be a ref to existing item
     current: {
@@ -43,14 +43,14 @@ const shipEquipmentConfig = [
   {
     id: 'lightWeapon_1',
     type: type.lightWeapon,
-    location: [700, -125],
+    location: [700, 225],
     size: [3, 1],
     current: null,
   },
   {
     id: 'engine_0',
     type: type.engine,
-    location: [125, -225],
+    location: [130, 135],
     size: [3, 3],
     current: {
       id: 'thruster_000',
@@ -86,7 +86,7 @@ export class ShipInventory {
     id: 'ion_cannon_001',
     type: type.lightWeapon,
     weight: 10,
-    size: [1, 3],
+    size: [4, 1],
     description: 'Description of Item 1',
     fireRate: 1,
     damage: 10,
@@ -116,22 +116,13 @@ export class ShipInventory {
   constructor(scene, x, y) {
     this.scene = scene;
     this.container = this.scene.add.container(0, 0);
-    // Create inventory container for items
-    this.inventoryContainer = this.scene.add.container(x, y);
-    this.container.add(this.inventoryContainer);
     this.containerOrigin.x = x;
     this.containerOrigin.y = y;
-
-    // Create grid background
-    this.createGrid();
-
+    
     // Create equipment container
-    this.createEquipmentContainer();
+    this.createEquipmentContainer(0, 0);
 
-    // this.inventoryContainer = this.scene.add.container(0, 0);
-
-
-    // Place items in the grid
+    this.createGrid(x, y);
     this.placeItemsInGrid();
 
     // Create preview panel
@@ -141,8 +132,9 @@ export class ShipInventory {
     // this.setupScrolling();
   }
 
-  createEquipmentContainer() {
-    this.equipmentContainer = this.scene.add.container(0, 0);
+  createEquipmentContainer(posX, posY) {
+    this.equipmentContainer = this.scene.add.container(posX, posY);
+    this.container.add(this.equipmentContainer);
 
     for (let i = 0; i < shipEquipmentConfig.length; i++) {
       const itemGraphics = this.scene.add.graphics();
@@ -152,7 +144,7 @@ export class ShipInventory {
       itemGraphics.fillStyle(itemColors.equipmentDefault, 0.3);
       itemGraphics.fillRect(x, y, width, height);
 
-      const itemGroup = this.scene.add.container(0, 0);
+      const itemGroup = this.scene.add.container(posX, posY);
       itemGroup.add([itemGraphics]);
       itemGroup.setInteractive(new Phaser.Geom.Rectangle(x, y, width, height), Phaser.Geom.Rectangle.Contains, true);
       itemGroup.on('pointerover', (e) => {
@@ -170,11 +162,13 @@ export class ShipInventory {
       this.equipmentContainer.add(itemGroup);
       this.equipmentSlots.push({ slot: shipEquipmentConfig[i], container: itemGroup });
     }
-
-    this.container.add(this.equipmentContainer);
   }
 
-  createGrid() {
+  createGrid(posX, posY) {
+    // Create inventory container for items
+    this.inventoryContainer = this.scene.add.container(posX, posY);
+    this.container.add(this.inventoryContainer);
+
     // Generate a texture from a single cell for better performance (directly)
     const cellTexture = this.scene.textures.createCanvas('gridCellTexture', this.cellWidth, this.cellHeight);
     const context = cellTexture.getContext();
