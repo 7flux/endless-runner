@@ -159,9 +159,14 @@ export class ShipInventory {
         itemGraphics.fillStyle(itemColors.equipmentDefault, 0.3);
         itemGraphics.fillRect(x, y, width, height);
       });
+      // would be easier to set 'dragenter' here, but only scene.input.on() seems to work with draggable events
       this.equipmentContainer.add(itemGroup);
-      this.equipmentSlots.push({ slot: shipEquipmentConfig[i], container: itemGroup });
+      this.equipmentSlots.push({ slot: shipEquipmentConfig[i], container: itemGroup, itemGraphics });
     }
+  }
+
+  createEquipmentItemGraphics() {
+
   }
 
   createGrid(posX, posY) {
@@ -551,13 +556,11 @@ export class ShipInventory {
 
     // dragenter - to indicate if a dropzone is valid for an item (changes color)
     this.scene.input.on('dragenter', (_, gameObject, dropZone) => {
-      // TODO: code smell
-      // const itemGraphics = slotInfo.container.list[0];
-      const itemGraphics = this.draggedItem.graphics;
-      itemGraphics.clear();
-
       const equipmentSlot = this.equipmentSlots.find(s => s.container === dropZone);
       if (equipmentSlot) {
+        const itemGraphics = equipmentSlot.itemGraphics;
+        itemGraphics.clear();
+
         if (this.draggedItem.item.type === equipmentSlot.slot.type) {
           itemGraphics.fillStyle(itemColors.equipmentApplicable, 0.5);
           itemGraphics.fillRect(...equipmentSlot.slot.location, equipmentSlot.slot.size[0] * this.cellWidth, equipmentSlot.slot.size[1] * this.cellHeight);
@@ -565,7 +568,9 @@ export class ShipInventory {
           itemGraphics.fillStyle(itemColors.invalid, 0.5);
           itemGraphics.fillRect(...equipmentSlot.slot.location, equipmentSlot.slot.size[0] * this.cellWidth, equipmentSlot.slot.size[1] * this.cellHeight);
         }
-      } else if (false) { // TODO: handle droppable area of the inventory grid
+      } else { // TODO: handle droppable area of the inventory grid
+        const itemGraphics = this.draggedItem.graphics;
+        itemGraphics.clear();
         const [width, height] = this.draggedItem.item.size;
         const [gridX, gridY] = this.draggedItem.gridPosition;
         itemGraphics.fillRect(
@@ -577,15 +582,14 @@ export class ShipInventory {
       }
     })
 
-    // this.scene.input.on('dragleave', (pointer, gameObject, dropZone) => {
-    //   const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
-    //   // TODO: code smell
-    //   const itemGraphics = slotInfo.container.list[0];
+    this.scene.input.on('dragleave', (pointer, gameObject, dropZone) => {
+      const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
+      const itemGraphics = slotInfo.itemGraphics;
 
-    //   itemGraphics.clear();
-    //   itemGraphics.fillStyle(itemColors.equipmentDefault, 0.3);
-    //   itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
-    // })
+      itemGraphics.clear();
+      itemGraphics.fillStyle(itemColors.equipmentDefault, 0.3);
+      itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
+    })
 
     this.scene.input.on('drop', (event, gameObject, dropZone) => {
       const { item, xyDeviations, ...itemProps } = this.inventoryItems.find(sprite => sprite.container === gameObject);
