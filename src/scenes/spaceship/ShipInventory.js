@@ -119,6 +119,8 @@ export class ShipInventory {
     this.containerOrigin.x = x;
     this.containerOrigin.y = y;
     
+    // TODO zone.setTint(0x00ff00); zone.clearTint(); - to change color of the zone when dragging over it
+
     // Create equipment container
     this.createEquipmentContainer(0, 0);
 
@@ -189,6 +191,11 @@ export class ShipInventory {
       'gridCellTexture'
     );
     this.gridSprite.setOrigin(0, 0);
+    this.gridSprite.setInteractive();
+    this.gridSprite.input.dropZone = true;
+    this.gridSprite.on('dragleave', () => {
+      console.log('dragleave gridZone');
+    })
 
     // Add the sprite to the inventoryContainer
     this.inventoryContainer.add(this.gridSprite);
@@ -554,10 +561,11 @@ export class ShipInventory {
       gameObject.y = dragY;
     });
 
-    // dragenter - to indicate if a dropzone is valid for an item (changes color)
+    // to indicate if a dropzone is valid for an item (changes color)
     this.scene.input.on('dragenter', (_, gameObject, dropZone) => {
       const equipmentSlot = this.equipmentSlots.find(s => s.container === dropZone);
       if (equipmentSlot) {
+        console.log('equipment gridZone');
         const itemGraphics = equipmentSlot.itemGraphics;
         itemGraphics.clear();
 
@@ -569,26 +577,29 @@ export class ShipInventory {
           itemGraphics.fillRect(...equipmentSlot.slot.location, equipmentSlot.slot.size[0] * this.cellWidth, equipmentSlot.slot.size[1] * this.cellHeight);
         }
       } else { // TODO: handle droppable area of the inventory grid
-        const itemGraphics = this.draggedItem.graphics;
-        itemGraphics.clear();
-        const [width, height] = this.draggedItem.item.size;
-        const [gridX, gridY] = this.draggedItem.gridPosition;
-        itemGraphics.fillRect(
-          gridX * this.cellWidth,
-          gridY * this.cellHeight,
-          width * this.cellWidth,
-          height * this.cellHeight
-        );
+        console.log('dragenter gridZone');
+        // const itemGraphics = this.draggedItem.graphics;
+        // itemGraphics.clear();
+        // const [width, height] = this.draggedItem.item.size;
+        // const [gridX, gridY] = this.draggedItem.gridPosition;
+        // itemGraphics.fillRect(
+        //   gridX * this.cellWidth,
+        //   gridY * this.cellHeight,
+        //   width * this.cellWidth,
+        //   height * this.cellHeight
+        // );
       }
     })
 
     this.scene.input.on('dragleave', (pointer, gameObject, dropZone) => {
       const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
-      const itemGraphics = slotInfo.itemGraphics;
-
-      itemGraphics.clear();
-      itemGraphics.fillStyle(itemColors.equipmentDefault, 0.3);
-      itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
+      if (slotInfo) {
+        const itemGraphics = slotInfo.itemGraphics;
+  
+        itemGraphics.clear();
+        itemGraphics.fillStyle(itemColors.equipmentDefault, 0.3);
+        itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
+      }
     })
 
     this.scene.input.on('drop', (event, gameObject, dropZone) => {
