@@ -193,9 +193,6 @@ export class ShipInventory {
     this.gridSprite.setOrigin(0, 0);
     this.gridSprite.setInteractive();
     this.gridSprite.input.dropZone = true;
-    this.gridSprite.on('dragleave', () => {
-      console.log('dragleave gridZone');
-    })
 
     // Add the sprite to the inventoryContainer
     this.inventoryContainer.add(this.gridSprite);
@@ -554,7 +551,7 @@ export class ShipInventory {
       }
     });
 
-    // TODO: game object will have it's own coordinates deviation based on initial location (if real x = 60px, it will think during any events, that x is actully 0px, since it's it's starting position)
+    // TODO: game object will have it's own coordinates deviation based on initial location (if real x = 60px, it will think during any events, that x is actully 0px, since it accounts starting position)
     this.scene.input.on('drag', (_, gameObject, dragX, dragY) => {
       this.cleanUpTooltip();
       gameObject.x = dragX;
@@ -565,7 +562,6 @@ export class ShipInventory {
     this.scene.input.on('dragenter', (_, gameObject, dropZone) => {
       const equipmentSlot = this.equipmentSlots.find(s => s.container === dropZone);
       if (equipmentSlot) {
-        console.log('equipment gridZone');
         const itemGraphics = equipmentSlot.itemGraphics;
         itemGraphics.clear();
 
@@ -576,18 +572,8 @@ export class ShipInventory {
           itemGraphics.fillStyle(itemColors.invalid, 0.5);
           itemGraphics.fillRect(...equipmentSlot.slot.location, equipmentSlot.slot.size[0] * this.cellWidth, equipmentSlot.slot.size[1] * this.cellHeight);
         }
-      } else { // TODO: handle droppable area of the inventory grid
-        console.log('dragenter gridZone');
-        // const itemGraphics = this.draggedItem.graphics;
-        // itemGraphics.clear();
-        // const [width, height] = this.draggedItem.item.size;
-        // const [gridX, gridY] = this.draggedItem.gridPosition;
-        // itemGraphics.fillRect(
-        //   gridX * this.cellWidth,
-        //   gridY * this.cellHeight,
-        //   width * this.cellWidth,
-        //   height * this.cellHeight
-        // );
+      } else {
+        // TODO: don't need to handle it right now (if not at all). highlight the grid area where we can drop the item
       }
     })
 
@@ -603,11 +589,10 @@ export class ShipInventory {
     })
 
     this.scene.input.on('drop', (event, gameObject, dropZone) => {
-      const { item, xyDeviations, ...itemProps } = this.inventoryItems.find(sprite => sprite.container === gameObject);
-      console.log('drop');
       const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
       // dropping on the equipment slot
       if (slotInfo) {
+        const { item, xyDeviations, ...itemProps } = this.inventoryItems.find(sprite => sprite.container === gameObject);
         if (slotInfo.slot.type === item.type) {
           // FIXME
           const [slotX, slotY] = slotInfo.slot.location;
@@ -632,13 +617,29 @@ export class ShipInventory {
         }
         // dropping on the inventory grid
         } else {
-          const check = this.inventoryItems.find(item => item.container === dropZone);
-          console.log('check', check);
+          const { gridX, gridY } = this.getItemGridLocation(gameObject, this.draggedItem);
+          if (this.isValidPlacement(this.draggedItem.item, gridX, gridY, this.draggedItem.gridPosition)) {
+            const [width, height] = this.draggedItem.item.size;
+
+            for (let y = 0; y < height; y++) {
+              for (let x = 0; x < width; x++) {
+                // add
+                this.grid[gridY + y][gridX + x] = { item: this.draggedItem.item, gridX, gridY, width, height };
+              }
+            }
+
+            this.draggedItem.gridPosition = [gridX, gridY];
+            gameObject.x = gridX * this.cellWidth - this.draggedItem.xyDeviations.x;
+            gameObject.y = gridY * this.cellHeight - this.draggedItem.xyDeviations.y;
+          }
+
+          this.inventoryItems.push(this.draggedItem);
         }
     })
 
     this.scene.input.on('dragend', (_, gameObject) => {
-      console.log('dragend')
+      return; // TODO: drop event messes up the dragend event. would be nice to remove dragend completely
+      console.log('dragend', _)
       const item = this.inventoryItems.find(sprite => sprite.container === gameObject);
 
       if (item) {
@@ -676,6 +677,13 @@ export class ShipInventory {
 
       this.draggedItem = null;
     });
+  }
+
+  getItemGridLocation(gameObject, item) {
+    const gridX = Math.floor((gameObject.x + item.xyDeviations.x) / this.cellWidth);
+    const gridY = Math.floor((gameObject.y + item.xyDeviations.y) / this.cellHeight);
+
+    return { gridX, gridY };
   }
 
   /* rules 
