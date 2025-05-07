@@ -2,6 +2,8 @@ const state = {
   idle: 'idle',
   dragging: 'dragging',
   dropping: 'dropping',
+  inventoryItem: 'inventoryItem',
+  equipmentItem: 'equipmentItem',
 }
 
 const type = {
@@ -78,7 +80,7 @@ export class ShipInventory {
   };
   inventoryItems = [];
   equipmentSlots = [];
-  draggedItem = null; // holds item information, and state ['inventoryItem', 'equipmentItem']
+  draggedItem = null; // holds item information, and state [state.inventoryItem, state.equipmentItem]
   container;
 
   items = [{
@@ -539,13 +541,13 @@ export class ShipInventory {
       if (item) {
         this.draggedItem = {
           ...item,
-          state: 'inventoryItem',
+          state: state.inventoryItem,
         };
       } else {
         item = this.equipmentSlots.find(s => s.inventoryItemObject && s.inventoryItemObject.gameObject === gameObject);
         this.draggedItem = {
           ...item.inventoryItemObject,
-          state: 'equipmentItem',
+          state: state.equipmentItem,
           slot: item.slot,
         }
       }
@@ -554,6 +556,7 @@ export class ShipInventory {
     // TODO: game object will have it's own coordinates deviation based on initial location (if real x = 60px, it will think during any events, that x is actully 0px, since it accounts starting position)
     this.scene.input.on('drag', (_, gameObject, dragX, dragY) => {
       this.cleanUpTooltip();
+      console.log('drag event', gameObject, dragX, dragY);
       gameObject.x = dragX;
       gameObject.y = dragY;
     });
@@ -601,6 +604,7 @@ export class ShipInventory {
           slotInfo.slot.current = item;
           slotInfo.inventoryItemObject = { item, xyDeviations, ...itemProps, gameObject };
           this.equipmentContainer.add(gameObject);
+          
           gameObject.x = slotX - xyDeviations.x;
           gameObject.y = slotY - xyDeviations.y;
   
@@ -617,6 +621,13 @@ export class ShipInventory {
         }
         // dropping on the inventory grid
         } else {
+          // comes from inventory slot
+          if (this.draggedItem.state === state.equipmentItem) {
+            // gameObject linked to it's initial game location. will need these garbage workarounds while it's origin isn't reset
+            gameObject.y -= this.height;
+            this.inventoryContainer.add(gameObject);
+            this.draggedItem.state = state.inventoryItem;
+          }
           const { gridX, gridY } = this.getItemGridLocation(gameObject, this.draggedItem);
           if (this.isValidPlacement(this.draggedItem.item, gridX, gridY, this.draggedItem.gridPosition)) {
             const [width, height] = this.draggedItem.item.size;
