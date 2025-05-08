@@ -3,6 +3,8 @@ const state = {
   dragging: 'dragging',
   dropping: 'dropping',
   inventoryItem: 'inventoryItem',
+  inventoryItemDragged: 'inventoryItemDragged',
+  equipmentItemDragged: 'equipmentItemDragged',
   equipmentItem: 'equipmentItem',
 }
 
@@ -541,13 +543,13 @@ export class ShipInventory {
       if (item) {
         this.draggedItem = {
           ...item,
-          state: state.inventoryItem,
+          state: state.inventoryItemDragged,
         };
       } else {
         item = this.equipmentSlots.find(s => s.inventoryItemObject && s.inventoryItemObject.gameObject === gameObject);
         this.draggedItem = {
           ...item.inventoryItemObject,
-          state: state.equipmentItem,
+          state: state.equipmentItemDragged,
           slot: item.slot,
         }
       }
@@ -615,42 +617,49 @@ export class ShipInventory {
             }
           }
 
+          this.draggedItem.state = state.equipmentItem;
           // Remove item from the inventory
           this.inventoryContainer.remove(gameObject);
           this.inventoryItems = this.inventoryItems.filter(sprite => sprite.container !== gameObject);
         }
         // dropping on the inventory grid
-        } else {
-          // comes from inventory slot
-          if (this.draggedItem.state === state.equipmentItem) {
-            // gameObject linked to it's initial game location. will need these garbage workarounds while it's origin isn't reset
-            gameObject.y -= this.height;
-            this.inventoryContainer.add(gameObject);
-            this.draggedItem.state = state.inventoryItem;
-          }
-          const { gridX, gridY } = this.getItemGridLocation(gameObject, this.draggedItem);
-          if (this.isValidPlacement(this.draggedItem.item, gridX, gridY, this.draggedItem.gridPosition)) {
-            const [width, height] = this.draggedItem.item.size;
-
-            for (let y = 0; y < height; y++) {
-              for (let x = 0; x < width; x++) {
-                // add
-                this.grid[gridY + y][gridX + x] = { item: this.draggedItem.item, gridX, gridY, width, height };
-              }
-            }
-
-            this.draggedItem.gridPosition = [gridX, gridY];
-            gameObject.x = gridX * this.cellWidth - this.draggedItem.xyDeviations.x;
-            gameObject.y = gridY * this.cellHeight - this.draggedItem.xyDeviations.y;
-          }
-
-          this.inventoryItems.push(this.draggedItem);
+      } else {
+        // comes from inventory slot
+        if (this.draggedItem.state === state.equipmentItemDragged) {
+          // gameObject linked to it's initial game location. will need these garbage workarounds while it's origin isn't properly reset
+          gameObject.y -= this.height;
+          this.inventoryContainer.add(gameObject);
+          this.draggedItem.state = state.inventoryItem;
         }
+        const { gridX, gridY } = this.getItemGridLocation(gameObject, this.draggedItem);
+        
+        if (this.isValidPlacement(this.draggedItem.item, gridX, gridY, this.draggedItem.gridPosition)) {
+          const [width, height] = this.draggedItem.item.size;
+
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              // add
+              this.grid[gridY + y][gridX + x] = { item: this.draggedItem.item, gridX, gridY, width, height };
+            }
+          }
+
+          this.draggedItem.gridPosition = [gridX, gridY];
+          gameObject.x = gridX * this.cellWidth - this.draggedItem.xyDeviations.x;
+          gameObject.y = gridY * this.cellHeight - this.draggedItem.xyDeviations.y;
+        }
+
+        this.inventoryItems.push(this.draggedItem);
+      }
     })
 
     this.scene.input.on('dragend', (_, gameObject) => {
+      // item is dropped on a wrong location, should be moved back to it's origin
+      if (state.equipmentItemDragged === this.draggedItem.state) {
+        this.draggedItem.state = state.equipmentItem;
+      } else if (state.inventoryItemDragged === this.draggedItem.state) {
+        this.draggedItem.state = state.inventoryItem;
+      }
       return; // TODO: drop event messes up the dragend event. would be nice to remove dragend completely
-      console.log('dragend', _)
       const item = this.inventoryItems.find(sprite => sprite.container === gameObject);
 
       if (item) {
