@@ -656,8 +656,12 @@ export class ShipInventory {
       // item is dropped on a wrong location, should be moved back to it's origin
       if (state.equipmentItemDragged === this.draggedItem.state) {
         this.draggedItem.state = state.equipmentItem;
+        gameObject.x = 0;
+        gameObject.y = 0;
       } else if (state.inventoryItemDragged === this.draggedItem.state) {
         this.draggedItem.state = state.inventoryItem;
+        gameObject.x = 0;
+        gameObject.y = 0;
       }
       return; // TODO: drop event messes up the dragend event. would be nice to remove dragend completely
       const item = this.inventoryItems.find(sprite => sprite.container === gameObject);
