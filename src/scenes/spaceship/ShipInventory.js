@@ -217,14 +217,22 @@ export class ShipInventory {
         const [gridX, gridY] = startingPosition;
 
         // Create item visual
-        const itemGraphics = this.scene.add.graphics();
-        itemGraphics.fillStyle(itemColors.inventoryDefault, 0.5);
-        itemGraphics.fillRect(
-          gridX * this.cellWidth,
-          gridY * this.cellHeight,
+        const rectangleItem = this.scene.add.rectangle(
+          gridX * this.cellWidth + (width * this.cellWidth) / 2,
+          gridY * this.cellHeight + (height * this.cellHeight) / 2,
           width * this.cellWidth,
-          height * this.cellHeight
+          height * this.cellHeight,
+          itemColors.inventoryDefault,
+          0.5
         );
+        // const itemGraphics = this.scene.add.graphics();
+        // itemGraphics.fillStyle(itemColors.inventoryDefault, 0.5);
+        // itemGraphics.fillRect(
+        //   gridX * this.cellWidth,
+        //   gridY * this.cellHeight,
+        //   width * this.cellWidth,
+        //   height * this.cellHeight
+        // );
 
         // Store item in grid
         for (let y = gridY; y < gridY + height; y++) {
@@ -241,7 +249,7 @@ export class ShipInventory {
         );
 
         const itemGroup = this.scene.add.container(0, 0);
-        itemGroup.add([itemGraphics, text]);
+        itemGroup.add([rectangleItem, text]);
 
         itemGroup.setInteractive(new Phaser.Geom.Rectangle(
           gridX * this.cellWidth,
@@ -254,28 +262,31 @@ export class ShipInventory {
         // Hover effects
         itemGroup.on('pointerover', (e) => {
           this.scene.input.setDefaultCursor('pointer');
-          itemGraphics.clear();
-          itemGraphics.fillStyle(itemColors.inventoryHovered, 0.7);
-          itemGraphics.fillRect(
-            gridX * this.cellWidth,
-            gridY * this.cellHeight,
-            width * this.cellWidth,
-            height * this.cellHeight
-          );
+          rectangleItem.setFillStyle(itemColors.inventoryHovered, 0.7)
+          // rectangleItem.clear();
+          // rectangleItem.setDefaultStyles(itemColors.inventoryHovered, 0.7);
+          // rectangleItem.fillStyle(itemColors.inventoryHovered, 0.7);
+          // rectangleItem.fillRect(
+          //   gridX * this.cellWidth,
+          //   gridY * this.cellHeight,
+          //   width * this.cellWidth,
+          //   height * this.cellHeight
+          // );
           this.showItemPreview(item);
         });
         this.scene.input.setDraggable(itemGroup);
 
         itemGroup.on('pointerout', () => {
           this.scene.input.setDefaultCursor('default');
-          itemGraphics.clear();
-          itemGraphics.fillStyle(itemColors.inventoryDefault, 0.5);
-          itemGraphics.fillRect(
-            gridX * this.cellWidth,
-            gridY * this.cellHeight,
-            width * this.cellWidth,
-            height * this.cellHeight
-          );
+          rectangleItem.setFillStyle(itemColors.inventoryDefault, 0.5)
+          // rectangleItem.clear();
+          // rectangleItem.fillStyle(itemColors.inventoryDefault, 0.5);
+          // rectangleItem.fillRect(
+          //   gridX * this.cellWidth,
+          //   gridY * this.cellHeight,
+          //   width * this.cellWidth,
+          //   height * this.cellHeight
+          // );
           this.cleanUpTooltip();
         });
 
@@ -284,7 +295,7 @@ export class ShipInventory {
         this.inventoryItems.push({
           item,
           state: state.idle,
-          graphics: itemGraphics,
+          itemObject: rectangleItem,
           text,
           container: itemGroup,
           gridPosition: startingPosition,
