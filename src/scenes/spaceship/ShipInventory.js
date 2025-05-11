@@ -624,7 +624,7 @@ export class ShipInventory {
           // Remove the item from the inventory grid
           for (let y = 0; y < this.totalCellRows; y++) {
             for (let x = 0; x < this.cellsInRow; x++) {
-              if (this.grid[y][x]?.item.id === item.id) this.grid[y][x].item = null;
+              if (this.grid[y][x]?.item?.id === item.id) this.grid[y][x] = null;
             }
           }
 
