@@ -143,6 +143,7 @@ export class ShipInventory {
     this.container.add(this.equipmentContainer);
 
     for (let i = 0; i < shipEquipmentConfig.length; i++) {
+      // TODO: replace itemGraphics with Rectangle
       const itemGraphics = this.scene.add.graphics();
 
       const [x, y, width, height] = [...shipEquipmentConfig[i].location, shipEquipmentConfig[i].size[0] * this.cellWidth, shipEquipmentConfig[i].size[1] * this.cellHeight];
@@ -225,14 +226,6 @@ export class ShipInventory {
           itemColors.inventoryDefault,
           0.5
         );
-        // const itemGraphics = this.scene.add.graphics();
-        // itemGraphics.fillStyle(itemColors.inventoryDefault, 0.5);
-        // itemGraphics.fillRect(
-        //   gridX * this.cellWidth,
-        //   gridY * this.cellHeight,
-        //   width * this.cellWidth,
-        //   height * this.cellHeight
-        // );
 
         // Store item in grid
         for (let y = gridY; y < gridY + height; y++) {
@@ -263,15 +256,6 @@ export class ShipInventory {
         itemGroup.on('pointerover', (e) => {
           this.scene.input.setDefaultCursor('pointer');
           rectangleItem.setFillStyle(itemColors.inventoryHovered, 0.7)
-          // rectangleItem.clear();
-          // rectangleItem.setDefaultStyles(itemColors.inventoryHovered, 0.7);
-          // rectangleItem.fillStyle(itemColors.inventoryHovered, 0.7);
-          // rectangleItem.fillRect(
-          //   gridX * this.cellWidth,
-          //   gridY * this.cellHeight,
-          //   width * this.cellWidth,
-          //   height * this.cellHeight
-          // );
           this.showItemPreview(item);
         });
         this.scene.input.setDraggable(itemGroup);
@@ -279,14 +263,6 @@ export class ShipInventory {
         itemGroup.on('pointerout', () => {
           this.scene.input.setDefaultCursor('default');
           rectangleItem.setFillStyle(itemColors.inventoryDefault, 0.5)
-          // rectangleItem.clear();
-          // rectangleItem.fillStyle(itemColors.inventoryDefault, 0.5);
-          // rectangleItem.fillRect(
-          //   gridX * this.cellWidth,
-          //   gridY * this.cellHeight,
-          //   width * this.cellWidth,
-          //   height * this.cellHeight
-          // );
           this.cleanUpTooltip();
         });
 
@@ -608,44 +584,29 @@ export class ShipInventory {
       const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
       // dropping on the equipment slot
       if (slotInfo) {
-        const { item, xyDeviations, ...itemProps } = this.inventoryItems.find(sprite => sprite.container === gameObject);
-        if (slotInfo.slot.type === item.type) {
-          // FIXME
-          const [slotX, slotY] = slotInfo.slot.location;
-          
-          // Update the slot's current item
-          slotInfo.slot.current = item;
-          slotInfo.inventoryItemObject = { item, xyDeviations, ...itemProps, gameObject };
-          this.equipmentContainer.add(gameObject);
-          
-          gameObject.x = slotX - xyDeviations.x;
-          gameObject.y = slotY - xyDeviations.y;
-  
-          // Remove the item from the inventory grid
-          for (let y = 0; y < this.totalCellRows; y++) {
-            for (let x = 0; x < this.cellsInRow; x++) {
-              if (this.grid[y][x]?.item?.id === item.id) this.grid[y][x] = null;
-            }
-          }
-
-          this.draggedItem.state = state.equipmentItem;
-          // Remove item from the inventory
-          this.inventoryContainer.remove(gameObject);
-          this.inventoryItems = this.inventoryItems.filter(sprite => sprite.container !== gameObject);
-        }
+        this.handleInventoryEquipmentDrop(gameObject, slotInfo);
         // dropping on the inventory grid
       } else {
-        // comes from inventory slot
+        // comes from equipment slot
         if (this.draggedItem.state === state.equipmentItemDragged) {
           // gameObject linked to it's initial game location. will need these garbage workarounds while it's origin isn't properly reset
           gameObject.y -= this.height;
-          this.inventoryContainer.add(gameObject);
           this.draggedItem.state = state.inventoryItem;
+          this.inventoryContainer.add(gameObject);
+        } else /* moving item inside of the inventory */ {
+
         }
         const { gridX, gridY } = this.getItemGridLocation(gameObject, this.draggedItem);
         
         if (this.isValidPlacement(this.draggedItem.item, gridX, gridY, this.draggedItem.gridPosition)) {
           const [width, height] = this.draggedItem.item.size;
+
+          // Remove the item from the inventory grid
+          for (let y = 0; y < this.totalCellRows; y++) {
+            for (let x = 0; x < this.cellsInRow; x++) {
+              if (this.grid[y][x]?.item?.id === this.draggedItem.id) this.grid[y][x] = null;
+            }
+          }
 
           for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
@@ -674,44 +635,35 @@ export class ShipInventory {
         gameObject.x = 0;
         gameObject.y = 0;
       }
-      return; // TODO: drop event messes up the dragend event. would be nice to remove dragend completely
-      const item = this.inventoryItems.find(sprite => sprite.container === gameObject);
-
-      if (item) {
-        const gridX = Math.floor((gameObject.x + item.xyDeviations.x) / this.cellWidth);
-        const gridY = Math.floor((gameObject.y + item.xyDeviations.y) / this.cellHeight);
-
-        if (this.isValidPlacement(item.item, gridX, gridY, item.gridPosition)) {
-          const [oldX, oldY] = item.gridPosition;
-          const [width, height] = item.item.size;
-
-          for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-              // remove from grid
-              this.grid[oldY + y][oldX + x] = null;
-              // add
-              this.grid[gridY + y][gridX + x] = { item: item.item, gridX, gridY, width, height };
-            }
-          }
-
-          item.gridPosition = [gridX, gridY];
-          gameObject.x = gridX * this.cellWidth - item.xyDeviations.x;
-          gameObject.y = gridY * this.cellHeight - item.xyDeviations.y;
-        } else {
-          // Return to original position
-          gameObject.x = item.gridPosition[0] * this.cellWidth - item.xyDeviations.x;
-          gameObject.y = item.gridPosition[1] * this.cellHeight - item.xyDeviations.y;
-        }
-      } else {
-        // it's an equipment item
-        const slotItem = this.equipmentSlots.find(s => s.inventoryItemObject && s.inventoryItemObject.gameObject === gameObject);
-        if (!slotItem) return;
-        slotItem.inventoryItemObject.gameObject.x = slotItem.slot.location[0] - slotItem.inventoryItemObject.xyDeviations.x;
-        slotItem.inventoryItemObject.gameObject.y = slotItem.slot.location[1] - slotItem.inventoryItemObject.xyDeviations.y;
-      }
-
-      this.draggedItem = null;
     });
+  }
+
+  handleInventoryEquipmentDrop(gameObject, slotInfo) {
+    const { item, xyDeviations, ...itemProps } = this.inventoryItems.find(sprite => sprite.container === gameObject);
+      if (slotInfo.slot.type === item.type) {
+        // FIXME
+        const [slotX, slotY] = slotInfo.slot.location;
+        
+        // Update the slot's current item
+        slotInfo.slot.current = item;
+        slotInfo.inventoryItemObject = { item, xyDeviations, ...itemProps, gameObject };
+        this.equipmentContainer.add(gameObject);
+        
+        gameObject.x = slotX - xyDeviations.x;
+        gameObject.y = slotY - xyDeviations.y;
+
+        // Remove the item from the inventory grid
+        for (let y = 0; y < this.totalCellRows; y++) {
+          for (let x = 0; x < this.cellsInRow; x++) {
+            if (this.grid[y][x]?.item?.id === item.id) this.grid[y][x] = null;
+          }
+        }
+
+        this.draggedItem.state = state.equipmentItem;
+        // Remove item from the inventory
+        this.inventoryContainer.remove(gameObject);
+        this.inventoryItems = this.inventoryItems.filter(sprite => sprite.container !== gameObject);
+      }
   }
 
   getItemGridLocation(gameObject, item) {
