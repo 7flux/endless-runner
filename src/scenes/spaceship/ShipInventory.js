@@ -122,7 +122,7 @@ export class ShipInventory {
     this.container = this.scene.add.container(0, 0);
     this.containerOrigin.x = x;
     this.containerOrigin.y = y;
-    
+
     // TODO zone.setTint(0x00ff00); zone.clearTint(); - to change color of the zone when dragging over it
 
     // Create equipment container
@@ -540,17 +540,26 @@ export class ShipInventory {
           slot: item.slot,
         }
       }
+
+      if (this.draggedItem.state === state.inventoryItemDragged) {
+        // Remove the item from the inventory grid
+        for (let y = 0; y < this.totalCellRows; y++) {
+          for (let x = 0; x < this.cellsInRow; x++) {
+            if (this.grid[y][x]?.item?.id === this.draggedItem?.item.id) this.grid[y][x] = null;
+          }
+        }
+      }
+      
+      this.cleanUpTooltip();
     });
 
     // TODO: game object will have it's own coordinates deviation based on initial location (if real x = 60px, it will think during any events, that x is actully 0px, since it accounts starting position)
     this.scene.input.on('drag', (_, gameObject, dragX, dragY) => {
-      this.cleanUpTooltip();
-      console.log('drag event', gameObject, dragX, dragY);
       gameObject.x = dragX;
       gameObject.y = dragY;
     });
 
-    // to indicate if a dropzone is valid for an item (changes color)
+    // indicates if an equipment dropzone is valid for an item
     this.scene.input.on('dragenter', (_, gameObject, dropZone) => {
       const equipmentSlot = this.equipmentSlots.find(s => s.container === dropZone);
       if (equipmentSlot) {
@@ -564,8 +573,6 @@ export class ShipInventory {
           itemGraphics.fillStyle(itemColors.invalid, 0.5);
           itemGraphics.fillRect(...equipmentSlot.slot.location, equipmentSlot.slot.size[0] * this.cellWidth, equipmentSlot.slot.size[1] * this.cellHeight);
         }
-      } else {
-        // TODO: don't need to handle it right now (if not at all). highlight the grid area where we can drop the item
       }
     })
 
@@ -573,7 +580,7 @@ export class ShipInventory {
       const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
       if (slotInfo) {
         const itemGraphics = slotInfo.itemGraphics;
-  
+
         itemGraphics.clear();
         itemGraphics.fillStyle(itemColors.equipmentDefault, 0.3);
         itemGraphics.fillRect(...slotInfo.slot.location, slotInfo.slot.size[0] * this.cellWidth, slotInfo.slot.size[1] * this.cellHeight);
@@ -690,14 +697,14 @@ export class ShipInventory {
   getCurrentZone(dropZone) {
     const slot = this.equipmentSlots.find(s => s.container === dropZone);
     const inventory = this.inventoryItems.find(sprite => sprite.container === dropZone);
-    
+
     if (slot) {
       // Check if the item can be placed in the drop zone
       const item = this.inventoryItems.find(sprite => sprite.container === dropZone);
       if (item && slot.slot.type === item.item.type) {
         return true;
       }
-  
+
       return false;
     } else {
       const item = this.inventoryItems.find(sprite => sprite.container === dropZone);
