@@ -585,6 +585,7 @@ export class ShipInventory {
       // dropping on the equipment slot
       if (slotInfo) {
         this.handleInventoryEquipmentDrop(gameObject, slotInfo);
+        this.draggedItem.gridPosition = [null, null];
         // dropping on the inventory grid
       } else {
         // comes from equipment slot
@@ -604,7 +605,7 @@ export class ShipInventory {
           // Remove the item from the inventory grid
           for (let y = 0; y < this.totalCellRows; y++) {
             for (let x = 0; x < this.cellsInRow; x++) {
-              if (this.grid[y][x]?.item?.id === this.draggedItem.id) this.grid[y][x] = null;
+              if (this.grid[y][x]?.item?.id === this.draggedItem?.item.id) this.grid[y][x] = null;
             }
           }
 
@@ -616,6 +617,7 @@ export class ShipInventory {
           }
 
           this.draggedItem.gridPosition = [gridX, gridY];
+          this.draggedItem.state = state.inventoryItem;
           gameObject.x = gridX * this.cellWidth - this.draggedItem.xyDeviations.x;
           gameObject.y = gridY * this.cellHeight - this.draggedItem.xyDeviations.y;
         }
