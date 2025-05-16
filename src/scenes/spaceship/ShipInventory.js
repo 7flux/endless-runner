@@ -545,11 +545,12 @@ export class ShipInventory {
         // Remove the item from the inventory grid
         for (let y = 0; y < this.totalCellRows; y++) {
           for (let x = 0; x < this.cellsInRow; x++) {
+            this.draggedItem.gridPosition = [null, null];
             if (this.grid[y][x]?.item?.id === this.draggedItem?.item.id) this.grid[y][x] = null;
           }
         }
       }
-      
+
       this.cleanUpTooltip();
     });
 
@@ -637,8 +638,8 @@ export class ShipInventory {
       // item is dropped on a wrong location, should be moved back to it's origin
       if (state.equipmentItemDragged === this.draggedItem.state) {
         this.draggedItem.state = state.equipmentItem;
-        gameObject.x = 0;
-        gameObject.y = 0;
+        gameObject.x = this.draggedItem.slot.location[0] - this.draggedItem.xyDeviations.x;
+        gameObject.y = this.draggedItem.slot.location[1] - this.draggedItem.xyDeviations.y;
       } else if (state.inventoryItemDragged === this.draggedItem.state) {
         this.draggedItem.state = state.inventoryItem;
         gameObject.x = 0;
