@@ -195,18 +195,18 @@ export class ShipInventory {
       this.cellsInRow * this.cellWidth, this.totalCellRows * this.cellHeight,
       'gridCellTexture'
     );
-    // this.gridSprite.setInteractive();
-    // this.gridSprite.input.dropZone = true; // little hack, may be useful in future
+    // this.gridSprite.input.dropZone = true; // KEEP: little hack, may be useful in the future
     this.gridSprite.setOrigin(0, 0);
     this.inventoryContainer.add(this.gridSprite);
     
     
+    // create cells to track drop events
     for (let x = 0; x < this.cellsInRow; x++) {
       for (let y = 0; y < this.totalCellRows; y++) {
-        // create cells to track drop events
         const itemGroup = this.scene.add.container(x*this.cellWidth,  y*this.cellHeight);
-        itemGroup.setInteractive(new Phaser.Geom.Rectangle(x, y, this.cellWidth, this.cellHeight), Phaser.Geom.Rectangle.Contains, true);
+        itemGroup.setInteractive(new Phaser.Geom.Rectangle(0, 0, this.cellWidth, this.cellHeight), Phaser.Geom.Rectangle.Contains, true);
         this.inventoryContainer.add(itemGroup);
+        this.gridCells[y][x] = { container: itemGroup, item: null };
       }
     }
   }
@@ -238,7 +238,7 @@ export class ShipInventory {
         // Store item in grid
         for (let y = gridY; y < gridY + height; y++) {
           for (let x = gridX; x < gridX + width; x++) {
-            this.gridCells[y][x] = { item, gridX, gridY, width, height };
+            Object.assign(this.gridCells[y][x], { item, gridX, gridY, width, height });
           }
         }
 
@@ -298,7 +298,7 @@ export class ShipInventory {
 
         for (let dy = 0; dy < arrayHeight && free; dy++) {
           for (let dx = 0; dx < arrayWidth && free; dx++) {
-            if (this.gridCells[y + dy][x + dx] !== null) {
+            if (this.gridCells[y + dy][x + dx].item) {
               free = false;
             }
           }
@@ -307,6 +307,7 @@ export class ShipInventory {
         if (free) return [x, y];
       }
     }
+
     return null;
   }
 
@@ -554,8 +555,8 @@ export class ShipInventory {
         // Remove the item from the inventory grid
         for (let y = 0; y < this.totalCellRows; y++) {
           for (let x = 0; x < this.cellsInRow; x++) {
-            this.draggedItem.gridPosition = [null, null];
-            if (this.gridCells[y][x]?.item?.id === this.draggedItem?.item.id) this.gridCells[y][x] = null;
+            this.draggedItem.gridPosition = [gameObject.x, gameObject.y];
+            if (this.gridCells[y][x]?.item?.id === this.draggedItem?.item.id) this.gridCells[y][x].item = null;
           }
         }
       }
@@ -563,7 +564,7 @@ export class ShipInventory {
       this.cleanUpTooltip();
     });
 
-    // TODO: game object will have it's own coordinates deviation based on initial location (if real x = 60px, it will think during any events, that x is actully 0px, since it accounts starting position)
+    // TODO: game object will have it's own coordinates deviation based on initial location (if it's real x = 60px, it will "think" during any events, that x is actully 0px, since it accounts starting position)
     this.scene.input.on('drag', (_, gameObject, dragX, dragY) => {
       gameObject.x = dragX;
       gameObject.y = dragY;
@@ -608,36 +609,33 @@ export class ShipInventory {
       } else { // dropping on the inventory grid
         // comes from equipment slot
         if (this.draggedItem.state === state.equipmentItemDragged) {
-          // gameObject linked to it's initial game location. will need these garbage workarounds while it's origin isn't properly reset
-          gameObject.y -= this.height - this.draggedItem.slot.location[1];
-          this.draggedItem.state = state.inventoryItem;
           this.inventoryContainer.add(gameObject);
-        } else /* moving item inside of the inventory */ {
-
         }
-        const { gridX, gridY } = this.getItemGridLocation(gameObject, this.draggedItem);
-        
-        if (this.isValidPlacement(this.draggedItem.item, gridX, gridY, this.draggedItem.gridPosition)) {
+
+        const { gridX, gridY } = this.getItemGridLocation(dropZone);
+
+        if (this.isValidPlacement(this.draggedItem.item, gridX, gridY)) {
           const [width, height] = this.draggedItem.item.size;
 
           // Remove the item from the inventory grid
           for (let y = 0; y < this.totalCellRows; y++) {
             for (let x = 0; x < this.cellsInRow; x++) {
-              if (this.gridCells[y][x]?.item?.id === this.draggedItem?.item.id) this.gridCells[y][x] = null;
+              if (this.gridCells[y][x]?.item?.id === this.draggedItem?.item.id) this.gridCells[y][x].item = null;
             }
           }
 
           for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
               // add
-              this.gridCells[gridY + y][gridX + x] = { item: this.draggedItem.item, gridX, gridY, width, height };
+              Object.assign(this.gridCells[gridY + y][gridX + x], { item: this.draggedItem.item, gridX, gridY, width, height });
             }
           }
 
           this.draggedItem.gridPosition = [gridX, gridY];
           this.draggedItem.state = state.inventoryItem;
-          gameObject.x = gridX * this.cellWidth - this.draggedItem.xyDeviations.x;
-          gameObject.y = gridY * this.cellHeight - this.draggedItem.xyDeviations.y;
+          const [originX, originY] = [gridX * this.cellWidth - this.draggedItem.xyDeviations.x, gridY * this.cellHeight - this.draggedItem.xyDeviations.y];
+          gameObject.x = originX;
+          gameObject.y = originY;
         }
 
         this.inventoryItems.push(this.draggedItem);
@@ -652,8 +650,8 @@ export class ShipInventory {
         gameObject.y = this.draggedItem.slot.location[1] - this.draggedItem.xyDeviations.y;
       } else if (state.inventoryItemDragged === this.draggedItem.state) {
         this.draggedItem.state = state.inventoryItem;
-        gameObject.x = 0;
-        gameObject.y = 0;
+        gameObject.x = this.draggedItem.gridPosition[0];
+        gameObject.y = this.draggedItem.gridPosition[1];
       }
     });
   }
@@ -675,7 +673,7 @@ export class ShipInventory {
         // Remove the item from the inventory grid
         for (let y = 0; y < this.totalCellRows; y++) {
           for (let x = 0; x < this.cellsInRow; x++) {
-            if (this.gridCells[y][x]?.item?.id === item.id) this.gridCells[y][x] = null;
+            if (this.gridCells[y][x]?.item?.id === item.id) this.gridCells[y][x].item = null;
           }
         }
 
@@ -686,63 +684,19 @@ export class ShipInventory {
       }
   }
 
-  getItemGridLocation(gameObject, item) {
-    const gridX = Math.floor((gameObject.x + item.xyDeviations.x) / this.cellWidth);
-    const gridY = Math.floor((gameObject.y + item.xyDeviations.y) / this.cellHeight);
+  getItemGridLocation(dropZone) {
+    const gridX = Math.floor(dropZone.x / this.cellWidth) - 1;
+    const gridY = Math.floor(dropZone.y / this.cellHeight) - 1;
 
     return { gridX, gridY };
   }
 
-  /* rules 
-    1. moving out of inventory container:
-      1.1. check if it's in the equipment area
-      1.2. if it's not, and drag&drop ends - return to original position
-      1.3. if it is:
-        1.3.1 - check if it can placed to equipments area: requirenments met, like skills or item is suited there. 
-        1.3.2 - otherwise return to original position
-    2. within inventory container:
-      2.1. check if it's in the grid area
-      2.2. check if it doesn't overlap other items
-  */
-
-  getCurrentZone(dropZone) {
-    const slot = this.equipmentSlots.find(s => s.container === dropZone);
-    const inventory = this.inventoryItems.find(sprite => sprite.container === dropZone);
-
-    if (slot) {
-      // Check if the item can be placed in the drop zone
-      const item = this.inventoryItems.find(sprite => sprite.container === dropZone);
-      if (item && slot.slot.type === item.item.type) {
-        return true;
-      }
-
-      return false;
-    } else {
-      const item = this.inventoryItems.find(sprite => sprite.container === dropZone);
-      console.log('item', item);
-    }
-
-  }
-
-  isValidPlacement(item, gridX, gridY, currentPos) {
+  isValidPlacement(item, gridX, gridY) {
     const [width, height] = item.size;
-    const [currentX, currentY] = currentPos;
 
     // Check bounds
     if (gridX < 0 || gridY < 0 || gridX + width > this.cellsInRow || gridY + height > this.totalCellRows) {
       return false;
-    }
-
-    // Check for collisions
-    for (let y = gridY; y < gridY + height; y++) {
-      for (let x = gridX; x < gridX + width; x++) {
-        const isCurrentCell = x >= currentX && x < currentX + width &&
-          y >= currentY && y < currentY + height;
-
-        if (!isCurrentCell && this.gridCells[y][x] !== null) {
-          return false;
-        }
-      }
     }
 
     return true;
