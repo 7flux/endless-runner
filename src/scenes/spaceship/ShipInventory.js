@@ -74,7 +74,7 @@ export class ShipInventory {
   cellHeight = 40;
   cellsInRow = this.width / this.cellWidth;
   totalCellRows = 40;
-  grid = Array(this.totalCellRows).fill(null).map(() => Array(this.cellsInRow).fill(null));
+  gridCells = Array(this.totalCellRows).fill(null).map(() => Array(this.cellsInRow).fill(null));
   scene;
   containerOrigin = {
     x: 0,
@@ -195,12 +195,20 @@ export class ShipInventory {
       this.cellsInRow * this.cellWidth, this.totalCellRows * this.cellHeight,
       'gridCellTexture'
     );
+    // this.gridSprite.setInteractive();
+    // this.gridSprite.input.dropZone = true; // little hack, may be useful in future
     this.gridSprite.setOrigin(0, 0);
-    this.gridSprite.setInteractive();
-    this.gridSprite.input.dropZone = true;
-
-    // Add the sprite to the inventoryContainer
     this.inventoryContainer.add(this.gridSprite);
+    
+    
+    for (let x = 0; x < this.cellsInRow; x++) {
+      for (let y = 0; y < this.totalCellRows; y++) {
+        // create cells to track drop events
+        const itemGroup = this.scene.add.container(x*this.cellWidth,  y*this.cellHeight);
+        itemGroup.setInteractive(new Phaser.Geom.Rectangle(x, y, this.cellWidth, this.cellHeight), Phaser.Geom.Rectangle.Contains, true);
+        this.inventoryContainer.add(itemGroup);
+      }
+    }
   }
 
   placeItemsInGrid() {
@@ -230,7 +238,7 @@ export class ShipInventory {
         // Store item in grid
         for (let y = gridY; y < gridY + height; y++) {
           for (let x = gridX; x < gridX + width; x++) {
-            this.grid[y][x] = { item, gridX, gridY, width, height };
+            this.gridCells[y][x] = { item, gridX, gridY, width, height };
           }
         }
 
@@ -290,7 +298,7 @@ export class ShipInventory {
 
         for (let dy = 0; dy < arrayHeight && free; dy++) {
           for (let dx = 0; dx < arrayWidth && free; dx++) {
-            if (this.grid[y + dy][x + dx] !== null) {
+            if (this.gridCells[y + dy][x + dx] !== null) {
               free = false;
             }
           }
@@ -525,6 +533,7 @@ export class ShipInventory {
   setupDragAndDrop() {
     // should clean up on dragend
     this.scene.input.on('dragstart', (_, gameObject, dragX, dragY) => {
+      console.log('drag started', [gameObject.x, gameObject.y]);
       let item = this.inventoryItems.find(sprite => sprite.container === gameObject);
 
       if (item) {
@@ -546,7 +555,7 @@ export class ShipInventory {
         for (let y = 0; y < this.totalCellRows; y++) {
           for (let x = 0; x < this.cellsInRow; x++) {
             this.draggedItem.gridPosition = [null, null];
-            if (this.grid[y][x]?.item?.id === this.draggedItem?.item.id) this.grid[y][x] = null;
+            if (this.gridCells[y][x]?.item?.id === this.draggedItem?.item.id) this.gridCells[y][x] = null;
           }
         }
       }
@@ -590,16 +599,17 @@ export class ShipInventory {
 
     this.scene.input.on('drop', (event, gameObject, dropZone) => {
       const slotInfo = this.equipmentSlots.find(s => s.container === dropZone);
-      // dropping on the equipment slot
-      if (slotInfo) {
-        this.handleInventoryEquipmentDrop(gameObject, slotInfo);
-        this.draggedItem.gridPosition = [null, null];
-        // dropping on the inventory grid
-      } else {
+      if (slotInfo) { // dropping on the equipment slot
+        const inventoryItem = this.inventoryItems.find(sprite => sprite.container === gameObject);
+        // comes from inventory
+        if (inventoryItem) {
+          this.handleInventoryEquipmentDrop(gameObject, slotInfo, inventoryItem);
+        }
+      } else { // dropping on the inventory grid
         // comes from equipment slot
         if (this.draggedItem.state === state.equipmentItemDragged) {
           // gameObject linked to it's initial game location. will need these garbage workarounds while it's origin isn't properly reset
-          gameObject.y -= this.height;
+          gameObject.y -= this.height - this.draggedItem.slot.location[1];
           this.draggedItem.state = state.inventoryItem;
           this.inventoryContainer.add(gameObject);
         } else /* moving item inside of the inventory */ {
@@ -613,14 +623,14 @@ export class ShipInventory {
           // Remove the item from the inventory grid
           for (let y = 0; y < this.totalCellRows; y++) {
             for (let x = 0; x < this.cellsInRow; x++) {
-              if (this.grid[y][x]?.item?.id === this.draggedItem?.item.id) this.grid[y][x] = null;
+              if (this.gridCells[y][x]?.item?.id === this.draggedItem?.item.id) this.gridCells[y][x] = null;
             }
           }
 
           for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
               // add
-              this.grid[gridY + y][gridX + x] = { item: this.draggedItem.item, gridX, gridY, width, height };
+              this.gridCells[gridY + y][gridX + x] = { item: this.draggedItem.item, gridX, gridY, width, height };
             }
           }
 
@@ -648,8 +658,8 @@ export class ShipInventory {
     });
   }
 
-  handleInventoryEquipmentDrop(gameObject, slotInfo) {
-    const { item, xyDeviations, ...itemProps } = this.inventoryItems.find(sprite => sprite.container === gameObject);
+  handleInventoryEquipmentDrop(gameObject, slotInfo, inventoryItem) {
+    const { item, xyDeviations, ...itemProps } = inventoryItem;
       if (slotInfo.slot.type === item.type) {
         // FIXME
         const [slotX, slotY] = slotInfo.slot.location;
@@ -665,7 +675,7 @@ export class ShipInventory {
         // Remove the item from the inventory grid
         for (let y = 0; y < this.totalCellRows; y++) {
           for (let x = 0; x < this.cellsInRow; x++) {
-            if (this.grid[y][x]?.item?.id === item.id) this.grid[y][x] = null;
+            if (this.gridCells[y][x]?.item?.id === item.id) this.gridCells[y][x] = null;
           }
         }
 
@@ -729,7 +739,7 @@ export class ShipInventory {
         const isCurrentCell = x >= currentX && x < currentX + width &&
           y >= currentY && y < currentY + height;
 
-        if (!isCurrentCell && this.grid[y][x] !== null) {
+        if (!isCurrentCell && this.gridCells[y][x] !== null) {
           return false;
         }
       }
