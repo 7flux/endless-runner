@@ -699,6 +699,15 @@ export class ShipInventory {
       return false;
     }
 
+    // Check for collisions
+    for (let y = gridY; y < gridY + height; y++) {
+      for (let x = gridX; x < gridX + width; x++) {
+        if (this.gridCells[y][x].item !== null) {
+          return false;
+        }
+      }
+    }
+
     return true;
   }
 
