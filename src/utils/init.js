@@ -2,7 +2,7 @@ import { Game } from "phaser";
 import { Preloader } from "@/preloader.js";
 import { HudScene } from "@/scenes/HudScene.js";
 import { MainScene } from "@/scenes/MainScene.js";
-import { MenuScene } from "@/scenes/MenuScene.js";
+import { MenuScene } from "@/scenes/MenuScene";
 import { SplashScene } from "@/scenes/SplashScene.js";
 import { SpaceshipEquipmentScene } from "@/scenes/spaceship/SpaceshipEquipmentScene";
 import '@/index.css'
@@ -45,7 +45,7 @@ const config = {
     }
   },
   scene: [
-    Preloader,
+    Preloader, // where it all starts
     SplashScene,
     MainScene,
     MenuScene,

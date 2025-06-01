@@ -20,7 +20,8 @@ export class SplashScene extends Scene {
                 const main_camera = this.cameras.main.fadeOut(1000, 0, 0, 0);
                 // Fadeout complete
                 main_camera.once("camerafadeoutcomplete", () => {
-                    this.scene.start("MainScene");
+                    this.scene.start("MenuScene");
+                    // this.scene.start("MainScene"); // TODO: to show / debug the inventory
                 });
             }
         });
