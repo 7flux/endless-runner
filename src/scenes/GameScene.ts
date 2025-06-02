@@ -9,6 +9,7 @@ export default class GameScene extends Phaser.Scene {
   private destination: Point | null = null;
   private speed = 100; // pixels per second
   private days = 0;
+  private dayPathLength = 128; // pixels per day
 
   constructor() {
     super({ key: 'GameScene' });
@@ -27,6 +28,11 @@ export default class GameScene extends Phaser.Scene {
     // Input to set destination
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       this.setDestination({ x: pointer.worldX, y: pointer.worldY });
+    });
+
+    // Listen for space key to toggle movement
+    this.input.keyboard?.on('keydown-SPACE', () => {
+      this.isMoving = !this.isMoving;
     });
   }
 
@@ -59,9 +65,10 @@ export default class GameScene extends Phaser.Scene {
       if (i === 0) return 0;
       return acc + Phaser.Math.Distance.Between(arr[i - 1].x, arr[i - 1].y, point.x, point.y);
     }, 0);
-    const movementPerDay = 128;
-    return Math.ceil(totalDistance / movementPerDay);
+    return Math.ceil(totalDistance / this.dayPathLength);
   }
+
+  private isMoving = false;
 
   drawPath() {
     this.pathGraphics.clear();
@@ -71,13 +78,22 @@ export default class GameScene extends Phaser.Scene {
       if (daysText) daysText.destroy();
       return;
     }
-    this.pathGraphics.lineStyle(2, 0xffd700, 1);
-    this.pathGraphics.beginPath();
-    this.pathGraphics.moveTo(this.circle.x, this.circle.y);
-    for (const point of this.path) {
-      this.pathGraphics.lineTo(point.x, point.y);
+    // Draw a dotted line for the path (dots only, no connecting lines)
+    for (let i = 0; i < this.path.length; i++) {
+      const prev = i === 0 ? { x: this.circle.x, y: this.circle.y } : this.path[i - 1];
+      const curr = this.path[i];
+      const segmentLength = Phaser.Math.Distance.Between(prev.x, prev.y, curr.x, curr.y);
+      const dotSpacing = 12;
+      const dotRadius = 2;
+      const steps = Math.floor(segmentLength / dotSpacing);
+      for (let j = 0; j < steps; j++) {
+        const t = j / steps;
+        const x = Phaser.Math.Interpolation.Linear([prev.x, curr.x], t);
+        const y = Phaser.Math.Interpolation.Linear([prev.y, curr.y], t);
+        this.pathGraphics.fillStyle(0xffd700, 1);
+        this.pathGraphics.fillCircle(x, y, dotRadius);
+      }
     }
-    this.pathGraphics.strokePath();
 
     // Draw or update days text at destination
     if (this.destination) {
@@ -97,7 +113,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   update(_: number, delta: number) {
-    if (this.path.length > 0) {
+    if (this.isMoving && this.path.length > 0) {
       const next = this.path[0];
       const dist = Phaser.Math.Distance.Between(this.circle.x, this.circle.y, next.x, next.y);
       const move = (this.speed * delta) / 1000;
