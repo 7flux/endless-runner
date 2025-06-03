@@ -65,7 +65,12 @@ export default class GameScene extends Phaser.Scene {
 
   drawPath() {
     this.pathGraphics.clear();
-    if (this.path.length < 2) return;
+    if (this.path.length < 2) {
+      // Remove days text if path is not relevant
+      const daysText = this.children.getByName('daysText');
+      if (daysText) daysText.destroy();
+      return;
+    }
     this.pathGraphics.lineStyle(2, 0xffd700, 1);
     this.pathGraphics.beginPath();
     this.pathGraphics.moveTo(this.circle.x, this.circle.y);
@@ -74,22 +79,24 @@ export default class GameScene extends Phaser.Scene {
     }
     this.pathGraphics.strokePath();
 
-    // Draw days text at destination
+    // Draw or update days text at destination
     if (this.destination) {
-      this.add.text(this.destination.x + 10, this.destination.y - 10, `${this.days} days`, {
-        font: '16px Arial',
-        color: '#fff',
-        backgroundColor: '#222',
-        padding: { x: 4, y: 2 },
-      }).setDepth(2).setAlpha(0.8).setScrollFactor(0).setOrigin(0, 1).setName('daysText');
-      // Remove previous days text
-      this.children.getAll('name', 'daysText').forEach(obj => {
-        if (obj !== this.children.getByName('daysText')) obj.destroy();
-      });
+      let daysText = this.children.getByName('daysText') as Phaser.GameObjects.Text | null;
+      if (!daysText) {
+        daysText = this.add.text(this.destination.x + 10, this.destination.y - 10, `${this.days} days`, {
+          font: '16px Arial',
+          color: '#fff',
+          backgroundColor: '#222',
+          padding: { x: 4, y: 2 },
+        }).setDepth(2).setAlpha(0.8).setScrollFactor(0).setOrigin(0, 1).setName('daysText');
+      } else {
+        daysText.setText(`${this.days} days`);
+        daysText.setPosition(this.destination.x + 10, this.destination.y - 10);
+      }
     }
   }
 
-  update(time: number, delta: number) {
+  update(_: number, delta: number) {
     if (this.path.length > 0) {
       const next = this.path[0];
       const dist = Phaser.Math.Distance.Between(this.circle.x, this.circle.y, next.x, next.y);
@@ -106,6 +113,12 @@ export default class GameScene extends Phaser.Scene {
         this.circle.y += Math.sin(angle) * move;
       }
       this.drawPath();
+    }
+
+    // Update days text position if it exists
+    const daysText = this.children.getByName('daysText') as Phaser.GameObjects.Text | null;
+    if (daysText && this.destination) {
+      daysText.setPosition(this.destination.x + 10, this.destination.y - 10);
     }
   }
 }
