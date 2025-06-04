@@ -6,6 +6,7 @@ import { MenuScene } from "@/scenes/MenuScene";
 import { SplashScene } from "@/scenes/SplashScene.js";
 import { SpaceshipEquipmentScene } from "@/scenes/spaceship/SpaceshipEquipmentScene";
 import '@/index.css'
+import GameScene from "@/scenes/GameScene";
 
 export const sharedConfig = {
   phaserContainerName: 'phaser-container'
@@ -49,6 +50,7 @@ const config = {
     SplashScene,
     MainScene,
     MenuScene,
+    GameScene,
     HudScene,
     SpaceshipEquipmentScene
   ]
