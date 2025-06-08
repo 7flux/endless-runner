@@ -1,4 +1,4 @@
-import { Game } from "phaser";
+import Phaser, { Game } from "phaser";
 import { Preloader } from "@/preloader.js";
 import { HudScene } from "@/scenes/HudScene.js";
 import { MainScene } from "@/scenes/MainScene.js";
