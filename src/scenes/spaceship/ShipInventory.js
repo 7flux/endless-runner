@@ -609,6 +609,7 @@ export class ShipInventory {
       } else { // dropping on the inventory grid
         // comes from equipment slot
         if (this.draggedItem.state === state.equipmentItemDragged) {
+          // TODO: should I add it?
           this.inventoryContainer.add(gameObject);
         }
 
@@ -636,9 +637,11 @@ export class ShipInventory {
           const [originX, originY] = [gridX * this.cellWidth - this.draggedItem.xyDeviations.x, gridY * this.cellHeight - this.draggedItem.xyDeviations.y];
           gameObject.x = originX;
           gameObject.y = originY;
+
+          // TODO: should I add it?
+          this.inventoryItems.push(this.draggedItem);
         }
 
-        this.inventoryItems.push(this.draggedItem);
       }
     })
 

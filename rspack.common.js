@@ -37,6 +37,20 @@ export default {
         test: /\.(css)$/,
         type: 'css/auto',
       },
+      {
+        test: /\.(ts|tsx)$/,
+        exclude: [/node_modules/],
+        loader: 'builtin:swc-loader',
+        options: {
+          jsc: {
+            parser: {
+              syntax: 'typescript',
+              tsx: true,
+            },
+          },
+        },
+        type: 'javascript/auto',
+      },
     ]
   },
   devServer: {
